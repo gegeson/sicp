@@ -1,0 +1,27 @@
+;;15:21->15:34
+(define (cube x)
+  (* x x x)
+  )
+
+(define (improve y x)
+  (/ (+ (/ x (* y y)) (* 2 y)) 3)
+  )
+(define (good-enough? guess x)
+  (< (abs (- (cube guess) x)) 0.001)
+  )
+(define (cbrt-iter guess x)
+  (if (good-enough? guess x)
+      guess
+      (cbrt-iter (improve guess x) x)
+      )
+  )
+
+(define (cbrt x)
+  (cbrt-iter 1.0 x)
+  )
+(use slib)
+(require 'trace)
+(trace cbrt-iter)
+(print (cbrt 8))
+(print (cbrt 27))
+(print (cbrt 10))

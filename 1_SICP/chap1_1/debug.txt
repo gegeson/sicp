@@ -1,0 +1,4 @@
+(use slib)
+(require 'trace)
+(trace evens-only*&co)
+(set! debug:max-count 100)

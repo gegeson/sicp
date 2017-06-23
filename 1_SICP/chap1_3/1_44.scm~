@@ -1,0 +1,36 @@
+(define (square x) (* x x))
+(define (average-3 a b c) (/ (+ a b c) 3))
+(define dx 0.00001)
+
+(define (compose f g)
+  (lambda (x) (f (g x)))
+  )
+(define (repeated f n)
+  (define (iter n)
+    (if (= n 1)
+        (lambda (a) (f a))
+        (compose f (iter (- n 1))))
+    )
+  (iter n)
+  )
+
+(define (smooth f)
+  (lambda (x)
+    (average-3
+      (f (- x dx)) (f x) (f (+ x dx))
+     )
+    ))
+;;間違い
+(define (smooth-n-dame f n)
+  (lambda (x)
+    (repeated (smooth f) n) x
+    )
+  )
+
+(define (smooth-n f n)
+  (lambda (x)
+    (((repeated smooth n) f) x)
+    )
+  )
+
+(print ((smooth-n sin 100) (/ 3.14 6)))
