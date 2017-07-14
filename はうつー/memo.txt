@@ -1,0 +1,4 @@
+Atomの話
+Ctrl + Alt + . 入れる
+Ctrl + Alt + 9 かこう
+Ctrl + Alt + s むく

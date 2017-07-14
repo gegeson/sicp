@@ -1,0 +1,25 @@
+#lang racket
+;関数を実行する時、まず引数を評価することから始めるので、
+;引数のnew-if関数の一つに再帰があると無限に引数の評価が行われ、無限ループになる。
+
+(define (square x) (* x x))
+
+(define (sqrt-iter guess x) (if (good-enough?2 guess x)
+guess
+(sqrt-iter (improve guess x) x)))
+
+(define (improve guess x) (average guess (/ x guess)))
+
+(define (average x y)
+(/ (+ x y) 2))
+(define (good-enough? guess x)
+(< (abs (- (square guess) x)) 0.001))
+(define (good-enough?2 guess pre_guess)
+(< (improve guess x) (* 1 guess)))
+
+(define (sqrt x) (sqrt-iter 1.0 x))
+(display (sqrt 3.0))
+;小さすぎると、0.001が不十分な近似になる
+;(display (sqrt 0.000000000000000000000009))
+;大きすぎると、最初のguessである1.0が小さすぎて、improveで変化しなくなってしまう
+;(display (sqrt 160000000000000000000000000000000000000000000000))

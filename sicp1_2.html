@@ -1,0 +1,662 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-2022-JP">
+ <title> 計算機プログラムの構造と解釈 問題の解</title>
+</head>
+<body bgcolor="white" vlink="ff0000">
+<font color="red">λ</font>1.2節<br><br>
+<a href="#ex1.09">問題 1.9</a>　
+<a href="#ex1.10">問題 1.10</a>　
+<a href="#ex1.11">問題 1.11</a>　
+<a href="#ex1.12">問題 1.12</a>　
+<a href="#ex1.13">問題 1.13</a>　<br>
+<a href="#ex1.14">問題 1.14</a>　
+<a href="#ex1.15">問題 1.15</a>　
+<a href="#ex1.16">問題 1.16</a>　
+<a href="#ex1.17">問題 1.17</a>　
+<a href="#ex1.18">問題 1.18</a>　<br>
+<a href="#ex1.19">問題 1.19</a>　
+<a href="#ex1.20">問題 1.20</a>　
+<a href="#ex1.21">問題 1.21</a>　
+<a href="#ex1.22">問題 1.22</a>　
+<a href="#ex1.23">問題 1.23</a>　<br>
+<a href="#ex1.24">問題 1.24</a>　
+<a href="#ex1.25">問題 1.25</a>　
+<a href="#ex1.26">問題 1.26</a>　
+<a href="#ex1.27">問題 1.27</a>　
+<a href="#ex1.28">問題 1.28</a>　<br><br>
+<a name="ex1.09">問題 1.9</a><br>
+<pre>(+ 4 5)
+(inc (+ (dec 4) 5))
+(inc (+ 3 5))
+(inc (inc (+ (dec 3) 5)))
+(inc (inc (+ 2 5)))
+(inc (inc (inc (+ (dec 2) 5))))
+(inc (inc (inc (+ 1 5))))
+(inc (inc (inc (inc (+ (dec 1) 5)))))
+(inc (inc (inc (inc (+ 0 5)))))
+(inc (inc (inc (inc 5))))
+(inc (inc (inc 6)))
+(inc (inc 7))
+(inc 8)
+9
+∴再帰的
+(+ 4 5)
+(+ (dec 4) (inc 5))
+(+ 3 6)
+(+ (dec 3) (inc 6))
+(+ 2 7)
+(+ (dec 2) (inc 7))
+(+ 1 8)
+(+ (dec 1) (inc 8))
+(+ 0 9)
+9
+∴反復的
+</pre>
+<a name="ex1.10">問題 1.10</a><br>
+<pre>(A 1 10) ==&gt; 1024
+
+(A 2 4) ==&gt; 65536
+
+(A 3 3) ==&gt; 65536
+
+(f n)=2*n
+
+冪乗を^で表すと, 
+
+(g n)=0    n=0の時
+      2^n  それ以外
+
+ところで
+a+(a+(a+ ...+(a+a)...))=a*n
+&lt;-    aがn個   -&gt;
+と書き, また
+
+a*(a*(a* ...*(a*a)...))=a^n
+&lt;-    aがn個   -&gt;
+と書くように
+
+a^(a^(a^ ...^(a^a)...))=a^^n 
+&lt;-    aがn個   -&gt;
+と書き, また
+
+a^^(a^^(a^^ ...^^(a^^a)...))=a^^^n 
+&lt;-      aがn個      -&gt;
+と書くことにする. 
+
+定義により (h 0)=0, (h 1)=2
+(h 2)=(g (h 1))=(g 2)=2^2
+(h 3)=(g (h 2))=(g 2^2)=2^(2^2)=2^^3
+
+ここで (h 1)=2=2^^1, (h 2)=2^^2と書けるから
+n&gt;0に対して (h n)=2^^n と書けるとすると
+(h n+1)=(g (h n))=(g 2^^n)=2^(2^^n)=2^^(n+1)
+
+従って
+(h n)=0     n=0の時
+      2^^n  それ以外
+
+上で得た (h 4) = 63336 = (2^(2^(2^2)))
+
+さらに試みると
+(A 3 n)=0      n=0の時
+        2^^^n  それ以外
+
+となり, 一般に
+(A m n)=0           n=0の時
+        2 ^^...^ n  それ以外
+         &lt;^がm個&gt;
+と書ける. 
+</pre>
+<a name="ex1.11">問題 1.11</a><br>
+<pre>再帰的
+(define (fr n)
+ (if (&lt; n 3) 
+     n
+     (+ (fr (- n 1))
+        (* 2 (fr (- n 2)))
+        (* 3 (fr (- n 3))))))
+
+反復的
+(define (fi n)
+ (f-iter 2 1 0 n))
+(define (f-iter a b c n)
+ (cond ((= n 0) c)
+       ((= n 1) b)
+       ((= n 2) a)
+       (else (f-iter (+ a b b c c c) a b (- n 1)))))
+</pre>
+<a name="ex1.12">問題 1.12</a><br>
+<pre>番号は0から数えるとして, 上からn段目, 端からi番目の要素は
+(define (pascal n i)
+ (if (or (= i 0) (= i n)) 
+     1
+     (+ (pascal (- n 1) (- i 1)) (pascal (- n 1) i))))
+</pre>
+<a name="ex1.13">問題 1.13</a><br>
+<pre>冪乗を↑であらわす. 
+
+φ=(1+√5)/2
+ψ=(1-√5)/2
+
+Fib(0) = (φ↑0 - ψ↑0)/√5 = (1 - 1)/√5 = 0
+Fib(1) = (φ↑1 - ψ↑1)/√5 = ((1+√5)/2 - (1-√5)/2)/√5 
+  = √5/√5 = 1
+Fib(n) = Fib(n-1)+Fib(n-2) 
+  = (φ↑(n-1) - ψ↑(n-1))/√5 + (φ↑(n-2) - ψ↑(n-2))/√5
+  = (φ↑(n-2)×(φ+1) - ψ↑(n-2)×(ψ+1))/√5
+
+φ↑2 = (1 + 2√5 +5)/4 = (3 + √5)/2 = φ+1
+ψ↑2 = (1 - 2√5 +5)/4 = (3 - √5)/2 = ψ+1
+
+∴ Fib(n) = (φ↑n - ψ↑n)/√5
+
+上の式で引く方の(ψ↑n)/√5の大きさを調べてみると
+
+ψ↑0/√5 = (/ 1 (sqrt 5))= .4472135954999579
+ψ↑1/√5 = (1-√5)/2/√5 = (/ (- 1 (sqrt 5)) 2 (sqrt 5))
+          = -.27639320225002106
+ψ↑n/√5 = ((1-√5)/2)↑n/√5
+          = (-.6180339887498949↑n)/2.23606797749979    n&gt;=2のとき
+
+はいずれも絶対値が0.5より小さく, Fib(n) は φ↑n/√5 にもっとも近い整数となる. 
+</pre>
+<a name="ex1.14">問題 1.14</a><br>
+<pre>(count-change 11)
+(cc 11 5)
+(+ (cc 11 4) (cc (- 11 (first-denomination 5)) 5))
+(+ (cc 11 4) (cc (- 11 50) 5))
+(+ (cc 11 4) (cc -39 5))
+(+ (cc 11 4) 0)
+(cc 11 4)
+(+ (cc 11 3) (cc (- 11 (first-denomination 4)) 4))
+(+ (cc 11 3) (cc (- 11 25) 4))
+(+ (cc 11 3) (cc -14 4))
+(+ (cc 11 3) 0)
+(cc 11 3)
+(+ (cc 11 2) (cc (- 11 (first-denomination 3)) 3))
+(+ (cc 11 2) (cc (- 11 10) 3))
+(+ (cc 11 2) (cc 1 3))
+(+ (cc 11 2) (+ (cc 1 2) (cc (- 1 (first-denomination 3)) 3)))
+(+ (cc 11 2) (+ (cc 1 2) (cc (- 1 10) 3)))
+(+ (cc 11 2) (+ (cc 1 2) (cc -9 3)))
+(+ (cc 11 2) (+ (cc 1 2) 0))
+(+ (cc 11 2) (cc 1 2))
+(+ (cc 11 2) (+ (cc 1 1) (cc (- 1 (first-denomination 2)) 2)))
+(+ (cc 11 2) (+ (cc 1 1) (cc (- 1 5) 2)))
+(+ (cc 11 2) (+ (cc 1 1) (cc -4 2)))
+(+ (cc 11 2) (+ (cc 1 1) 0))
+(+ (cc 11 2) (cc 1 1))
+(+ (cc 11 2) (+ (cc 1 0) (cc (- 1 (first-denomination 1)) 1)))
+(+ (cc 11 2) (+ (cc 1 0) (cc (- 1 1) 1)))
+(+ (cc 11 2) (+ (cc 1 0) (cc 0 1)))
+(+ (cc 11 2) (+ (cc 1 0) 1))
+(+ (cc 11 2) (+ 0 1))
+(+ (cc 11 2) 1)
+(+ (+ (cc 11 1) (cc (- 11 (first-denomination 2)) 2)) 1)
+                ==================================== 
+  (cc (- 11 (first-denomination 2)) 2)
+  (cc (- 11 5) 2)
+  (cc 6 2)
+  (+ (cc 6 1) (cc (- 6 (first-denomination 2)) 2))
+  (+ (cc 6 1) (cc (- 6 5) 2))
+  (+ (cc 6 1) (cc 1 2))
+  (+ (cc 6 1) (+ (cc 1 1) (cc (- 1 (first-denomination 2)) 2)))
+  (+ (cc 6 1) (+ (cc 1 1) (cc (- 1 5) 2)))
+  (+ (cc 6 1) (+ (cc 1 1) (cc -4 2)))
+  (+ (cc 6 1) (+ (cc 1 1) 0))
+  (+ (cc 6 1) (cc 1 1))
+  (+ (cc 6 1) (+ (cc 1 0) (cc (- 1 (first-denomination 1)) 1)))
+  (+ (cc 6 1) (+ (cc 1 0) (cc (- 1 1) 1)))
+  (+ (cc 6 1) (+ (cc 1 0) (cc 0 1)))
+  (+ (cc 6 1) (+ (cc 1 0) 1))
+  (+ (cc 6 1) (+ 0 1))
+  (+ (cc 6 1) 1)
+  (+ (+ (cc 6 0) (cc (- 6 (first-denomination 1)) 1)) 1)
+  (+ (+ (cc 6 0) (cc (- 6 1) 1)) 1)
+  (+ (+ (cc 6 0) (+ (cc 5 0) (cc (- 5 (first-denomination 1)) 1))) 1)
+                             ===================================
+    (cc (- 5 (first-denomination 1)) 1)
+    (cc (- 5 1) 1)
+    (cc 4 1)
+    (+ (cc 4 0) (cc (- 4 (first-denomination 1)) 1))
+    (+ (cc 4 0) (cc (- 4 1) 1))
+    (+ (cc 4 0) (+ (cc 3 0) (cc (- 3 (first-denomination 1)) 1)))
+    (+ (cc 4 0) (+ (cc 3 0) (cc (- 3 1) 1)))
+    (+ (cc 4 0) (+ (cc 3 0) (cc 2 1)))
+    (+ (cc 4 0) (+ (cc 3 0) (+ (cc 2 0) (cc (- 2 (first-denomination 1)) 1))))
+    (+ (cc 4 0) (+ (cc 3 0) (+ (cc 2 0) (cc (- 2 1) 1))))
+    (+ (cc 4 0) (+ (cc 3 0) (+ (cc 2 0) (cc 1 1))))
+    (+ (cc 4 0) (+ (cc 3 0) (+ (cc 2 0) (+ (cc 1 0) (cc (- 1 (first-denomination 1)) 1)))))
+    (+ (cc 4 0) (+ (cc 3 0) (+ (cc 2 0) (+ (cc 1 0) (cc (- 1 1) 1)))))
+    (+ (cc 4 0) (+ (cc 3 0) (+ (cc 2 0) (+ (cc 1 0) (cc 0 1)))))
+    (+ (cc 4 0) (+ (cc 3 0) (+ (cc 2 0) (+ (cc 1 0) 1))))
+    (+ (cc 4 0) (+ (cc 3 0) (+ (cc 2 0) (+ 0 1))))
+    (+ (cc 4 0) (+ (cc 3 0) (+ (cc 2 0) 1)))
+    (+ (cc 4 0) (+ (cc 3 0) (+ 0 1)))
+    (+ (cc 4 0) (+ (cc 3 0) 1))
+    (+ (cc 4 0) (+ 0 1))
+    (+ (cc 4 0) 1)
+    (+ 0 1)
+    1
+                             =
+  (+ (+ (cc 6 0) (+ (cc 5 0) 1)) 1)
+  (+ (+ (cc 6 0) (+ 0 1)) 1)
+  (+ (+ (cc 6 0) 1) 1)
+  (+ (+ 0 1) 1)
+  (+ 1 1)
+  2 
+                =
+(+ (+ (cc 11 1) 2) 1)
+(+ (+ (+ (cc 11 0) (cc (- 11 1) 1)) 2) 1)
+(+ (+ (+ (cc 11 0) (+ (cc 10 0) (cc (- 10 (first-denomination 1)) 1))) 2) 1)
+(+ (+ (+ (cc 11 0) (+ (cc 10 0) (cc (- 10 1) 1))) 2) 1)
+(+ (+ (+ (cc 11 0) (+ (cc 10 0) (cc 9 1))) 2) 1)
+(+ (+ (+ (cc 11 0) (+ (cc 10 0) (+ (cc 9 0) (cc (- 9 (first-denomination 1)) 1)))) 2) 1)
+                                            =================================== 
+  (cc (- 9 (first-denomination 1)) 1)
+  (cc (- 9 1) 1)
+  (+ (cc 8 0) (cc (- 8 (first-denomination 1)) 1))
+  (+ (cc 8 0) (cc (- 8 1) 1))
+  (+ (cc 8 0) (cc 7 1))
+  (+ (cc 8 0) (+ (cc 7 0) (cc (- 7 (first-denomination 1)) 1)))
+  (+ (cc 8 0) (+ (cc 7 0) (cc (- 7 1) 1)))
+  (+ (cc 8 0) (+ (cc 7 0) (+ (cc 6 0) (cc (- 6 (first-denomination 1)) 1))))
+  (+ (cc 8 0) (+ (cc 7 0) (+ (cc 6 0) (cc (- 6 1) 1))))
+  (+ (cc 8 0) (+ (cc 7 0) (+ (cc 6 0) (cc 5 1))))
+  (+ (cc 8 0) (+ (cc 7 0) (+ (cc 6 0) (+ (cc 5 0) (cc (- 5 (first-denomination 1)) 1)))))
+                                                  ===================================
+    (cc (- 5 (first-denomination 1)) 1)
+    (cc (- 5 1) 1)
+    (cc 4 1)
+    (+ (cc 4 0) (cc (- 4 (first-denomination 1)) 1))
+    (+ (cc 4 0) (cc (- 4 1) 1))
+    (+ (cc 4 0) (cc 3 1))
+    (+ (cc 4 0) (+ (cc 3 0) (cc (- 3 (first-denomination 1)) 1)))
+    (+ (cc 4 0) (+ (cc 3 0) (cc (- 3 1) 1)))
+    (+ (cc 4 0) (+ (cc 3 0) (+ (cc 2 0) (cc (- 2 (first-denomination 1)) 1))))
+    (+ (cc 4 0) (+ (cc 3 0) (+ (cc 2 0) (cc (- 2 1) 1))))
+    (+ (cc 4 0) (+ (cc 3 0) (+ (cc 2 0) (+ (cc 1 0) (cc (- 1 (first-denomination 1)) 1)))))
+    (+ (cc 4 0) (+ (cc 3 0) (+ (cc 2 0) (+ (cc 1 0) (cc (- 1 1) 1)))))
+    (+ (cc 4 0) (+ (cc 3 0) (+ (cc 2 0) (+ (cc 1 0) (cc 0 1)))))
+    (+ (cc 4 0) (+ (cc 3 0) (+ (cc 2 0) (+ (cc 1 0) 1))))
+    (+ (cc 4 0) (+ (cc 3 0) (+ (cc 2 0) (+ 0 1))))
+    (+ (cc 4 0) (+ (cc 3 0) (+ (cc 2 0) 1)))
+    (+ (cc 4 0) (+ (cc 3 0) (+ 0 1)))
+    (+ (cc 4 0) (+ (cc 3 0) 1))
+    (+ (cc 4 0) (+ 0 1))
+    (+ (cc 4 0) 1)
+    (+ 0 1)
+    1
+                                                  =
+  (+ (cc 8 0) (+ (cc 7 0) (+ (cc 6 0) (+ (cc 5 0) 1))))
+  (+ (cc 8 0) (+ (cc 7 0) (+ (cc 6 0) (+ 0 1))))
+  (+ (cc 8 0) (+ (cc 7 0) (+ (cc 6 0) 1)))
+  (+ (cc 8 0) (+ (cc 7 0) (+ 0 1)))
+  (+ (cc 8 0) (+ (cc 7 0) 1))
+  (+ (cc 8 0) (+ 0 1))
+  (+ (cc 8 0) 1)
+  (+ 0 1)
+  1
+                                            =
+(+ (+ (+ (cc 11 0) (+ (cc 10 0) (+ (cc 9 0) 1))) 2) 1)
+(+ (+ (+ (cc 11 0) (+ (cc 10 0) (+ 0 1))) 2) 1)
+(+ (+ (+ (cc 11 0) (+ (cc 10 0) 1)) 2) 1)
+(+ (+ (+ (cc 11 0) (+ 0 1)) 2) 1)
+(+ (+ (+ (cc 11 0) 1) 2) 1)
+(+ (+ (+ 0 1) 2) 1)
+(+ (+ 1 2) 1)
+(+ 3 1)
+4
+</pre>
+<a name="ex1.15">問題 1.15</a><br>
+<pre>a. 12.15を3で割り続けると
+  12.15 → 4.05 → 1.35 → 0.45 → 0.15 → 0.5
+と5回割ると0.1以下になる. 従って5回. 
+
+b. sineは末尾再帰的なので, スペースの増加の程度はΘ(1).
+ステップはaが3倍になると1回増えるので, Θ(log<sub>3</sub>a). 
+</pre>
+<a name="ex1.16">問題 1.16</a><br>
+<pre>(define (fast-expt b n)
+  (define (even? n)
+    (= (remainder n 2) 0))
+  (define (fast-expt-iter a b n)
+    (cond ((= n 0) a)
+          ((even? n) (fast-expt-iter a (* b b) (/ n 2)))
+          (else (fast-expt-iter (* a b) b (- n 1)))))
+  (fast-expt-iter 1 b n))
+
+(fast-expt 2 10) ==&gt; 1024
+</pre>
+<a name="ex1.17">問題 1.17</a><br>
+<pre>(define (double x) (+ x x))
+(define (halve x) (/ x 2))
+
+(define (fast-mult a b)
+  (cond ((= b 0) 0)
+        ((even? b) (double (fast-mult a (halve b))))
+        (else (+ a (fast-mult a (- b 1))))))
+</pre>
+<a name="ex1.18">問題 1.18</a><br>
+<pre>(define (double n) (* n 2))
+(define (halve n) (/ n 2))
+(define (fast-times a b)
+  (define (fast-times-iter c a b)
+   (cond ((= b 0) c)
+         ((even? b) 
+          (fast-times-iter (double c) a (halve b)))
+         (else (fast-times-iter (+ c a) a (- b 1)))))
+  (fast-times-iter 0 a b))
+
+(fast-times 31 33) ==&gt; 1023
+</pre>
+<a name="ex1.19">問題 1.19</a><br>
+<pre>p' = pp + qq
+q' = 2pq + qq
+
+(define (fib n)
+  (fib-iter 1 0 0 1 n))
+
+(define (fib-iter a b p q count)
+  (cond ((= count 0) b)
+        ((even? count)
+         (fib-iter a
+                   b
+                   <font color="red">(+ (* p p) (* q q))</font>  ;<i> p'</i>を計算
+                   <font color="red">(+ (* 2 p q) (* q q))</font>;<i> q'</i>を計算
+                   (/ count 2)))
+        (else (fib-iter (+ (* b q) (* a q) (* a p))
+                        (+ (* b p) (* a q))
+                        p
+                        q
+                        (- count 1)))))
+
+</pre>
+<a name="ex1.20">問題 1.20</a><br>
+<pre>(gcd 206 40)
+
+40 != 0 -&gt; 
+(gcd 40 (rem 206 40))
+
+(rem 206 40) != 0 -&gt;
+(gcd (rem 206 40) (rem 40 (rem 206 40)))
+
+(rem 40 (rem 206 40)) != 0 -&gt;
+(gcd (rem 40 (rem 206 40)) 
+     (rem (rem 206 40) (rem 40 (rem 206 40))))
+
+(rem (rem 206 40) (rem 40 (rem 206 40))) != 0 -&gt;
+(gcd (rem (rem 206 40) (rem 40 (rem 206 40)))
+     (rem (rem 40 (rem 206 40)) 
+          (rem (rem 206 40) (rem 40 (rem 206 40)))))
+
+(rem (rem 40 (rem 206 40)) 
+     (rem (rem 206 40) (rem 40 (rem 206 40)))) = 0 -&gt;
+(rem (rem 206 40) (rem 40 (rem 206 40))) -&gt; 2
+
+</pre>
+<a name="ex1.21">問題 1.21</a><br>
+<pre>(define (smallest-divisor n)
+  (find-divisor n 2))
+
+(define (find-divisor n test-divisor)
+  (cond ((&gt; (square test-divisor) n) n)
+        ((divides? test-divisor n) test-divisor)
+        (else (find-divisor n (+ test-divisor 1)))))
+
+(define (divides? a b)
+  (= (remainder b a) 0))
+
+(define (square x) (* x x))
+
+(define (prime? n)
+  (= n (smallest-divisor n)))
+
+(prime? 199)) ==&gt; true
+(prime? 1999)) ==&gt; true
+(prime? 19999)) ==&gt; false
+</pre>
+<a name="ex1.22">問題 1.22</a><br>
+<pre>(load "ex1.21.sch")
+
+(define (timed-prime-test n)
+  (newline)
+  (display n)
+  (start-prime-test n (runtime)))
+
+(define (start-prime-test n start-time)
+  (if (prime? n)
+      (report-prime (- (runtime) start-time))))
+
+(define (report-prime elapsed-time)
+  (display " *** ")
+  (display elapsed-time))
+
+(define (search-for-primes n)
+  (define (search-for-primes-iter i k)
+    (cond ((=  k 3))
+          ((prime? i) (display i) (newline) (search-for-primes-iter (+ i 2) (+ k 1)))
+          (else (search-for-primes-iter (+ i 2) k))))
+  (search-for-primes-iter n 0))
+
+;;(search-for-primes 1001)
+;;1009
+;;1013
+;;1019
+;;
+;;(search-for-primes 10001)
+;;10007
+;;10009
+;;10037
+;;
+;;(search-for-primes 100001)
+;;100003
+;;100019
+;;100043
+;;
+;;(search-for-primes 1000001)
+;;1000003
+;;1000033
+;;1000037
+
+   1009 *** .01599999999999996
+   1013 *** 0.
+   1019 *** 0.
+  10007 *** .032999999999999974
+  10009 *** .016000000000000014
+  10037 *** .016000000000000014
+ 100003 *** .09999999999999998
+ 100019 *** .09999999999999998
+ 100043 *** .09999999999999998
+1000003 *** .30000000000000004
+1000033 *** .31599999999999984
+1000037 *** .30000000000000004
+
+たしかに n が2桁増えると時間が1桁増える傾向が見られる. 
+</pre>
+
+<a name="ex1.23">問題 1.23</a><br>
+<pre>find-divisorを
+
+(define (find-divisor n test-divisor)
+  (define (next x)
+    (if (= x 2) 3
+        (+ x 2)))
+  (cond ((&gt; (square test-divisor) n) n)
+        ((divides? test-divisor n) test-divisor)
+        (else (find-divisor n (next test-divisor)))))
+
+のように変更し, 問題1.22と同じ計算機で実行した. 
+
+   1009 *** .016999999999999904
+   1013 *** 0.
+   1019 *** .017000000000000348
+  10007 *** .03399999999999981
+  10009 *** .03399999999999981
+  10037 *** .016000000000000014
+ 100003 *** .06699999999999973
+ 100019 *** .06699999999999973
+ 100043 *** .050000000000000266
+1000003 *** .20000000000000018
+1000033 *** .18299999999999983
+1000037 *** .18299999999999983
+</pre>
+
+<a name="ex1.24">問題 1.24</a><br>
+<pre>
+(define (square x) (* x x))
+
+(define (expmod base exp m)
+  (cond ((= exp 0) 1)
+        ((even? exp)
+         (remainder (square (expmod base (/ exp 2) m))
+                    m))
+        (else
+         (remainder (* base (expmod base (- exp 1) m))
+                    m))))        
+
+(define (timed-prime-test n)
+  (newline)
+  (display n)
+  (start-prime-test n (runtime)))
+
+(define (start-prime-test n start-time)
+  (if (fast-prime? n 10)
+      (report-prime (- (runtime) start-time))))
+
+(define (report-prime elapsed-time)
+  (display " *** ")
+  (display elapsed-time))
+
+(define (fermat-test n)
+  (define (try-it a)
+    (= (expmod a n n) a))
+  (try-it (+ 1 (random (- n 1)))))
+
+(define (fast-prime? n times)
+  (cond ((= times 0) true)
+        ((fermat-test n) (fast-prime? n (- times 1)))
+        (else false)))
+
+   1009 *** .04999999999999982
+   1013 *** .04999999999999982
+   1019 *** .04999999999999982
+  10007 *** .09999999999999964
+  10009 *** .06700000000000017
+  10037 *** .06600000000000028
+ 100003 *** .11699999999999999
+ 100019 *** .133
+ 100043 *** .1160000000000001
+1000003 *** .133
+1000033 *** .1499999999999999
+1000037 *** .133
+</pre>
+<a name="ex1.25">問題 1.25</a><br>
+
+<br>本文にあるexpmodは途中結果をつねにbaseで割った剰余にし, 
+大きくなるのを防いでいる. それに対し, 
+本問のexpmodはbaseのexp乗を長いまま計算し, 
+その後mで割った剰余を求めているので, 途中の多倍長計算の手間が大変になり, 
+高速素数テストには使えない. <br><br>
+
+<a name="ex1.26">問題 1.26</a><br>
+<br>もともとのexpmodはexpが偶数の時, exp/2乗を一度だけ計算し, 
+squareで自乗しているが, 本問のexpmodはexp/2乗を2回計算して乗算している. 
+
+例えばbaseの8乗の計算では, 1にbaseを掛けてbaseの1乗を得, それを自乗して2乗を得,
+自乗して4乗を得, 自乗して8乗を得る. 乗算は4回. 
+
+それに対し, 本問の方法では8乗を得るのに4乗を2度計算してから乗算する. 
+4乗を得るのに2乗を2度計算してから乗算する. 
+1乗を得るのにも1 * baseを行なうから, 総計15回の乗算が必要. 
+これはほぼ8*2となり, Θ(<i>n</i>)のプロセスになっている. 
+<br><br>
+
+<a name="ex1.27">問題 1.27</a><br>
+<pre>(define (square x) (* x x))
+
+(define (expmod base exp m)
+  (cond ((= exp 0) 1)
+        ((even? exp)
+         (remainder (square (expmod base (/ exp 2) m))
+                    m))
+        (else
+         (remainder (* base (expmod base (- exp 1) m))
+                    m))))
+
+(define (carmichael-test n)   ;;returns n-1 for carmichael number n
+  (define (ctest a i)
+    (cond ((= a n) i)
+          ((= (expmod a n n) a) (ctest (+ a 1) (+ i 1)))
+          (else (ctest (+ a 1) i))))
+  (ctest 1 0))
+</pre>
+<a name="ex1.28">問題 1.28</a><br>
+<pre>(define (square x) (* x x))
+
+(define (expmod base exp m)
+ (cond ((= exp 0) 1)
+       ((even? exp)
+           (let ((temp (remainder (square (expmod base (/ exp 2) m)) m)))
+        (if (and (&lt; 1 temp) (&lt; temp m) (= (remainder (square temp) m) 1))
+            (display (list base exp temp (remainder (square temp) m)))) temp))
+       (else (remainder (* base (expmod base (- exp 1) m)) m))))
+
+(define (miller-rabin-test n)
+  (define (tt a i)
+    (cond ((= a n) i)
+          ((&gt; (expmod a (- n 1) n) 1)(display a) (tt (+ a 1) (+ i 1)))
+          (else (tt (+ a 1) i))))
+  (tt 1 0))
+
+(define test '())
+(do ((i 2 (+ i 1))) ((= i 100))
+(if (= (miller-rabin-test i) 0) (set! test (cons i test))))
+test ==&gt;
+
+(97 89 83 79 73 71 67 61 59 53 47 43 41 37 31 29 23 19 17 13 11 7 5 3 2)
+
+(miller-rabin-test 561) ==&gt; 240
+
+(miller-rabin-test 1105) ==&gt; 336
+
+一方
+
+(define (fermat-test n)
+  (define (try-it a)
+    (= (expmod a n n) a))
+  (try-it (+ 1 (random (- n 1)))))
+
+(define (fast-prime? n times)
+  (cond ((= times 0) #t)
+        ((fermat-test n) (fast-prime? n (- times 1)))
+        (else '())))
+
+ (fast-prime? 561 10)
+==&gt; #t
+
+ (fast-prime? 1105 10)
+==&gt; #t
+</pre>
+
+<br>
+<!--a name="ex1.10"--><!--問題 1.10--><br>
+<!--a name="ex1.11"--><!--問題 1.11--><br>
+<!--a name="ex1.12"--><!--問題 1.12--><br>
+<!--a name="ex1.13"--><!--問題 1.13--><br>
+<!--a name="ex1.14"--><!--問題 1.14--><br>
+<!--a name="ex1.15"--><!--問題 1.15--><br>
+<!--a name="ex1.16"--><!--問題 1.16--><br>
+<!--a name="ex1.17"--><!--問題 1.17--><br>
+<!--a name="ex1.18"--><!--問題 1.18--><br>
+<!--a name="ex1.19"--><!--問題 1.19--><br>
+<!--a name="ex1.20"--><!--問題 1.20--><br>
+<!--a name="ex1.21"--><!--問題 1.21--><br>
+<!--a name="ex1.22"--><!--問題 1.22--><br>
+<!--a name="ex1.23"--><!--問題 1.23--><br>
+<!--a name="ex1.24"--><!--問題 1.24--><br>
+<!--a name="ex1.25"--><!--問題 1.25--><br>
+<!--a name="ex1.26"--><!--問題 1.26--><br>
+<!--a name="ex1.27"--><!--問題 1.27--><br>
+<!--a name="ex1.28"--><!--問題 1.28--><br>
+</body><!--a name="ex1.09"--><!--問題 1.9--></html>
