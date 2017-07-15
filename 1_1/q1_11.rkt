@@ -2,6 +2,7 @@
 ;9:29->9:44->9:55->10:02
 #lang racket
 (require racket/trace)
+(require sicp)
 
 (define (f1 n)
   (if (< n 3)
@@ -15,8 +16,16 @@
 ;(newline)
 ;(display (f1 4))
 ;(newline)
-  (trace f1)
-(display (f1 5))
+;(trace f1)
+(define start (runtime))
+(display (f1 20))
+(newline)
+(display (- (runtime) start))
+(newline)
+(define start2 (runtime))
+(display (f1 10))
+(newline)
+(display (- (runtime) start2))
 (define (f2-iter n a b c)
   (if (= n 0)
     a
@@ -37,4 +46,4 @@
 ;(newline)
 ;(display (f2 4))
 ;(newline)
-(display (f2 5))
+;(display (f2 5))

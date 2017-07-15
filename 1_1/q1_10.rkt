@@ -1,4 +1,5 @@
 #lang racket
+(require sicp)
 ;8:52->9:06
 (define (A x y)
   (cond ((= y 0) 0)
@@ -29,7 +30,10 @@
 ;(A 2 n)
 ;=2^(2^(2^2))
 (newline)
-(display (A 3 3))
+(define start (runtime))
+(display (A 2 10))
+(newline)
+(display (- (runtime) start))
 ;=(A 2 (A 3 2))
 ;=(A 2 (A 2 (A 3 1)))
 ;=(A 2 (A 2 2))
