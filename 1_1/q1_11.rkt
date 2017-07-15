@@ -1,0 +1,40 @@
+;+8
+;9:29->9:44->9:55->10:02
+#lang racket
+(require racket/trace)
+
+(define (f1 n)
+  (if (< n 3)
+    n
+    (+ (f1 (- n 1)) (* 2 (f1 (- n 2))) (* 3 (f1 (- n 3))) )))
+;(display (f1 1))
+;(newline)
+;(display (f1 2))
+;(newline)
+;(display (f1 3))
+;(newline)
+;(display (f1 4))
+;(newline)
+  (trace f1)
+(display (f1 5))
+(define (f2-iter n a b c)
+  (if (= n 0)
+    a
+    (f2-iter (- n 1) b c (+ (* 3 a) (* 2 b) c))
+    )
+  )
+(define (f2 n)
+  (f2-iter n 0 1 2)
+  )
+
+  (trace f2-iter)
+(newline)
+;(display (f2 1))
+;(newline)
+;(display (f2 2))
+;(newline)
+;(display (f2 3))
+;(newline)
+;(display (f2 4))
+;(newline)
+(display (f2 5))

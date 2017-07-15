@@ -7,7 +7,7 @@
 guess
 (sqrt-iter (improve guess x) x)))
 
-(define (improve guess x)  (printf (format "guess = ~a" guess))
+(define (improve guess x) (printf (format "guess = ~a" guess))
                            (newline)
                            (printf (format "x = ~a" x))
                            (newline)
