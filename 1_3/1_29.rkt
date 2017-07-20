@@ -1,6 +1,7 @@
 #lang racket
 (require racket/trace)
 ;22:15->22:40
+;5 8:45->8:54
 (define (sum term a next b)
   (if (> a b)
     0
@@ -17,12 +18,22 @@
 (define (cube x)
   (* x x x))
 (define (simpson f a b n)
-    (/ (* (h a b an) (simpson_ f a b 0 n)) 3)
+    (/ (* (h a b n) (simpson_ f a b 0 n)) 3)
   )
 (define (simpson_ f a b k n)
     (if (> k n)
       0
       (+ (* (co k n) (f (+ a (* k (h a b n))))) (simpson_ f a b (+ k 1) n)))
+  )
+(define (simpson2 f a b k n)
+  (define (term_ k)
+    (* (co k n) (f (+ a (* k (h a b n))))))
+  (define (next k)
+    (+ k 1))
+    (define (simpson2-iter f term k next n)
+      (sum term k next n)
+      )
+      (/ (* (h a b n) (simpson2-iter f term_ 0 next n)) 3)
   )
   (define (co k n)
     (cond
@@ -44,3 +55,7 @@
 (display (simpson cube 0 1 10))
 (newline)
 (display (simpson cube 0 2 100))
+(newline)
+(display (simpson2 cube 0 1 0 10))
+(newline)
+(display (simpson2 cube 0 2 0 100))

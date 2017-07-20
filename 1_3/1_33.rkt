@@ -1,0 +1,77 @@
+#lang racket
+(require racket/trace)
+;#10:03->10:15
+(define (square a) (* a a))
+(define (smallest-divisor n)
+  (find-divisor n 2))
+
+(define (find-divisor n test-divisor)
+  (cond ((> (square test-divisor) n) n)
+        ((divides? test-divisor n) test-divisor)
+        (else (find-divisor n (+ test-divisor 1)))))
+
+(define (divides? a b)
+  (= (remainder b a) 0))
+
+(define (prime? n)
+  (= n (smallest-divisor n)))
+
+  (define (gcd a b)
+    (if (= b 0)
+        a
+        (gcd b (remainder a b))))
+
+(define (accumulate combiner null-value term a next b)
+  (if (> a b)
+      null-value
+      (combiner (term a) (accumulate combiner null-value term (next a) next b))
+))
+(define (filtered-accumulate filter combiner null-value term a next b)
+  (cond ((> a b) null-value)
+    ((filter a)
+     (combiner (term a) (filtered-accumulate filter combiner null-value term (next a) next b)))
+    (else (filtered-accumulate filter combiner null-value term (next a) next b))))
+
+(define (filtered-accumulate2 filter combiner null-value term a next b)
+    (define (filtered-accumulate2-iter a result)
+      (cond
+          ((> a b) result)
+          ((filter a)
+            (filtered-accumulate2-iter (next a) (combiner (term a) result)))
+            (else
+              (filtered-accumulate2-iter (next a) result)
+             )
+           )
+        )
+  (trace filtered-accumulate2-iter)
+  (filtered-accumulate2-iter a null-value)
+  )
+
+(define (id a) a)
+(define (inc a) (+ a 1))
+(define (sum-prime a b)
+    (filtered-accumulate prime? + 0 square a inc b)
+  )
+(define (sum-gcd i n)
+      (define (gcd1 i)
+        (= (gcd i n) 1)
+        )
+      (filtered-accumulate gcd1 * 1 id i inc n)
+  )
+
+  (define (sum-prime2 a b)
+      (filtered-accumulate2 prime? + 0 square a inc b)
+    )
+  (define (sum-gcd2 i n)
+        (define (gcd1 i)
+          (= (gcd i n) 1)
+          )
+        (filtered-accumulate2 gcd1 * 1 id i inc n)
+    )
+(display (sum-prime 2 11))
+(newline)
+(display (sum-gcd 1 10))
+(newline)
+(display (sum-prime2 2 11))
+(newline)
+(display (sum-gcd2 1 10))
