@@ -1,0 +1,41 @@
+#lang racket
+(require racket/trace)
+; 16:30->16:37
+(define (cont-frac n d k)
+  (define (cont-frac-iter i)
+    (cond
+      ((= i k) (/ (n k) (d k)))
+      (else
+        (/ (n i) (+ (d i) (cont-frac-iter (+ i 1))))
+       )
+    ))
+  (trace cont-frac-iter)
+  (cont-frac-iter 1)
+)
+(define (cont-frac-nega n d k)
+    (define (cont-frac-iter i)
+      (cond
+        ((= i k) (/ (n k) (d k)))
+        (else
+          (/ (n i) (- (d i) (cont-frac-iter (+ i 1))))
+         )
+        )
+      )
+  (cont-frac-iter 1)
+  )
+(define (tan-cf x k)
+  (define (n i)
+    (if (= i 1)
+      x
+      (* x x))
+    )
+  (define (odd i)
+      (- (* 2 i) 1)
+    )
+  (cont-frac-nega n odd 10)
+  )
+(display (tan-cf (/ 3.14 4) 10))
+(newline)
+(display (tan-cf (/ 3.14 2) 10))
+(newline)
+(display (tan-cf (/ 3.14 3) 10))
