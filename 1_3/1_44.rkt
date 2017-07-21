@@ -1,0 +1,30 @@
+#lang racket
+(require racket/trace)
+;13:31->13:37
+;13:37->13:43
+(define (square x) (* x x))
+(define (inc x) (+ x 1))
+(define (compose f g) (lambda (x) (f (g x))))
+(define (repeated f n)
+    (define (repeated-iter i)
+        (if (= i n)
+            (lambda (x) (f x))
+            (compose f (repeated-iter (+ i 1)))
+          )
+      )
+      (repeated-iter 1)
+  )
+(define (smooth f)
+  (define dx 0.00001)
+    (lambda (x)
+            (/ (+ (f (- x dx)) (f x) (f (+ x dx))) 3)
+            )
+  )
+;(define (smooth-n f n)
+;    (repeated (smooth f) n)
+;  )
+;fをn回繰り返した後に平滑化（上）、ではなく、
+;fを平滑化する処理をn回繰り返す、なのでこうなる
+(define (smooth-n f n)
+    ((repeated smooth n) f)
+  )

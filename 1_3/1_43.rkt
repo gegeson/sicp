@@ -1,0 +1,18 @@
+#lang racket
+(require racket/trace)
+;13:31->13:37
+(define (square x) (* x x))
+(define (inc x) (+ x 1))
+(define (compose f g) (lambda (x) (f (g x))))
+(display ((compose square inc) 6) )
+(newline)
+(define (repeated f n)
+    (define (repeated-iter i)
+        (if (= i n)
+            (lambda (x) (f x))
+            (compose f (repeated-iter (+ i 1)))
+          )
+      )
+      (repeated-iter 1)
+  )
+(display ((repeated square 2) 5))
