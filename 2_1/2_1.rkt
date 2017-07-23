@@ -1,0 +1,80 @@
+#lang racket
+(require racket/trace)
+;22:35->22:46序文
+;11:13->11:28
+;7m
+(define (make-rat n d)
+  (let ((g (gcd n d)))
+    (cons (/ n g) (/ d g))))
+
+(define (make-rat2 n d)
+  (let ((g (gcd n d)))
+    (let ((n (/ n g))
+          (d (/ d g)))
+      (cond
+        ((and (negative? n) (negative? d))
+         (cons (- n) (- d)))
+        ((and (negative? n) (positive? d))
+         (cons n d)
+         )
+         ((and (positive? n) (negative? d))
+          (cons (- n) (- d))
+          )
+        (else
+         (cons n d)
+         )
+        ))
+    )
+  )
+
+  (define (make-rat3 n d)
+    (let ((g (gcd n d)))
+      (let ((n (/ n g))
+            (d (/ d g)))
+          (if (negative? d)
+              (cons (- n) (- d))
+              (cons n d)
+            )
+          )
+      )
+    )
+(define (numer x) (car x))
+(define (denom x) (cdr x))
+
+(define (print-rat x)
+  (newline)
+  (display (numer x))
+  (display "/")
+  (display (denom x))
+  )
+
+(define (add-rat x y)
+  (make-rat (+ (* (numer x) (denom y))
+               (* (numer y) (denom x)))
+            (* (denom x) (denom y))))
+
+(define (sub-rat x y)
+  (make-rat (- (* (numer x) (denom y))
+               (* (numer y) (denom x)))
+            (* (denom x) (denom y))))
+
+(define (mul-rat x y)
+  (make-rat (* (numer x) (numer y))
+            (* (denom x) (denom y))))
+
+(define (div-rat x y)
+  (make-rat (* (numer x) (denom y))
+            (* (denom x) (numer y))))
+
+(define (equal-rat? x y)
+  (= (* (numer x) (denom y))
+     (* (numer y) (denom x))))
+(print-rat (make-rat2 13 26))
+(print-rat (make-rat2 13 -26))
+(print-rat (make-rat2 -13 26))
+(print-rat (make-rat2 -13 -26))
+
+(print-rat (make-rat3 13 26))
+(print-rat (make-rat3 13 -26))
+(print-rat (make-rat3 -13 26))
+(print-rat (make-rat3 -13 -26))
