@@ -19,6 +19,23 @@
     (make-interval (min p1 p2 p3 p4)
                    (max p1 p2 p3 p4))))
 
+(define (div-interval x y)
+ (cond
+   ((or (= (upper-bound y) 0) (= (lower-bound y) 0))
+     (newline) (display "0 division Error"))
+   ((negative? (* (upper-bound y) (lower-bound y)))
+    (newline) (display "0をまたぐな"))
+   (else
+    (mul-interval
+     x
+     (make-interval (/ 1.0 (upper-bound y))
+                    (/ 1.0 (lower-bound y)))))))
+(define (width-interval interval)
+ (let ((x (upper-bound interval))
+       (y (lower-bound interval)))
+       (abs (/ (- x y) 2))))
+
+
 (define (make-center-width c w)
   (make-interval (- c w) (+ c w)))
 (define (center i)
