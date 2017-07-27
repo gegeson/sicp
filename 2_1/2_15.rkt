@@ -66,11 +66,19 @@
 ; 自分自身を自分自身で割ったら区間は[1,1]のはずなのに、そこからずれが生じる
 ; 一方、[1, 1]で割っても影響なし
 
-(display (div-interval i5 i6))
+;(display (div-interval i5 i6))
+;(newline)
+;(display (div-interval i5 i5))
+(define i_np (make-interval -2 1))
 (newline)
-(display (div-interval i5 i5))
-; 実験結果から、明らかに和、差、積からは誤差が出ない
-; 割り算だけなぜずれるのか？
+; (1, 4)になるはずが(-2, 4)になる
+(display (mul-interval i_np i_np))
+(define i_np2 (make-interval -1 2))
+(newline)
+; 同じく、(1, 4)になるはずが(-2, 4)になる
+(display (mul-interval i_np2 i_np2))
+; 実験結果から、明らかに和、差からは誤差が出ない
+; 掛け算、割り算だけなぜずれるのか？
 ; 割り算のズレについて
 ; [a-ap, a+ap]を自分で割ると、
 ; [(a-ap)/(a+ap), (a+ap)/(a-ap)]
