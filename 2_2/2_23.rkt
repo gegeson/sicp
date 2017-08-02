@@ -1,0 +1,17 @@
+#lang racket
+(require racket/trace)
+(require sicp)
+;18:50->18:53
+(define (for-each proc lst)
+  (if (null? lst)
+    (let ()
+      (newline)
+      true)
+    (let ()
+      (proc (car lst))
+      (for-each proc (cdr lst))))
+  )
+(for-each (lambda (x)
+                  (newline)
+                  (display x))
+          (list 57 321 88))

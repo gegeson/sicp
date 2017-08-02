@@ -20,8 +20,8 @@
       (cons a (filter lst even?))
       (cons a (filter lst odd?))))
 
-(display (same-parity2 1 2 3 4 5 6 7))
+(display (same-parity 1 2 3 4 5 6 7))
 (newline)
 
-(display (same-parity2 2 3 4 5 6 7))
+(display (same-parity 2 3 4 5 6 7))
 (newline)
