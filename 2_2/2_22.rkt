@@ -27,6 +27,7 @@
 ;(iter '(3) '(4 1))
 ;(iter '() '(9 4 1))
 ;となる
+;(cons 9 (cons 4 (cons 1 nil)))
 ;(car things)をanswerの左側に順々に入れていくと、
 ;逆になる（当たり前）
 (define (square-list2 items)
@@ -77,3 +78,4 @@
             (append answer (list (square (car things)))))))
     (iter items nil))
 (display (square-list3 (list 1 2 3)))
+(newline)
