@@ -56,6 +56,8 @@
 ;(display (cons (cons (cons nil 1) 4) 9))
 ; -> (((() . 1) . 4) . 9)
 ; である。
+; consの後半部分がnilかlistでない場合、
+; (cons a b) => (a . b)と表記される。
 (display (square-list (list 1 2 3)))
 (newline)
 (display (square-list2 (list 1 2 3)))

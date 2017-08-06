@@ -1,0 +1,30 @@
+#lang racket
+(require racket/trace)
+(require sicp)
+(define x (list 1 2 3))
+(define y (list 4 5 6))
+(display (list x y))
+;(cons (1 2 3) (cons (4 5 6) nil))
+;= (cons (1 2 3) ((4 5 6)))
+;= ((1 2 3) (4 5 6))
+;consの後ろのリストは括弧を展開される
+(newline)
+(display (cons x y))
+;(cons 1 (2 3)) = (cons 1 (cons 2 (cons 3 nil)))
+; consの後ろのリストは展開される
+;故に(cons x y) => ((1 2 3) 4 5 6)
+(newline)
+(display (append x y))
+(newline)
+(display (cons 1 '(1 2)))
+(define (append2 lst1 lst2)
+  (cond
+    ((null? lst1) lst2)
+    (else
+      (cons (car lst1) (append (cdr lst1) lst2))
+     )
+    ))
+(newline)
+(display (append2 x y))
+;(cons 1 (cons 2 (cons 3 '(4 5 6))))
+;=>(1 2 3 4 5 6)
