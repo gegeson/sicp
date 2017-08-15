@@ -26,3 +26,7 @@
 (display (cons (cons 1 (cons 2 nil)) (cons 3 (cons 4 nil))))
 ;(1->(2->(3->(4->nil)->nil) ->nil))
 ;=(1 (2 (3 4)))
+ /    \
+1   /   \
+   2   /  \
+      3    4
