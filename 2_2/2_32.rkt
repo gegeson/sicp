@@ -24,9 +24,25 @@
       (append rest (map (lambda (set)
                                 (cons (car s) set)) rest))
       )))
+(define (is_duplicate_none lst)
+  (define (is_not_duplicate a lst)
+    (cond ((null? lst) true)
+      (else (and (not (equal? a (car lst))) (is_not_duplicate a (cdr lst))))
+      )
+    )
+  (cond
+    ((null? lst) true)
+    (else
+      (and (is_not_duplicate (car lst) (cdr lst)) (is_duplicate_none (cdr lst)))
+     )
+    )
+  )
+
 (display (subsets '(1 2 3)))
 (newline)
 (display (length (subsets '(1 2 3 4 5 6))))
+(newline)
+(display (is_duplicate_none (subsets '(1 2 3 4 5 6))))
 (newline)
 ;解説
 ;letで作るrestは、(1 2 3)で言うなら(2 3)の冪集合である
