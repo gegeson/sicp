@@ -50,17 +50,13 @@
            (+ (length x) y)) 0 (map f t)))
 
 (define (count-leaves3 t)
- (accumulate
-  + 0 (map (lambda (t)
-                  (cond
-                      ((null? t) 0)
-                    ((not (pair? t)) 1)
-                    (else
-                     (count-leaves3 t)
-                     ))
-                   )
-       t)))
-
+  (accumulate + 0
+              (map (lambda (t)
+                           (cond ((null? t) 0)
+                             ((not (pair? t)) 1)
+                             (else (count-leaves3 t)))) t))
+  )
+(trace count-leaves3)
 
 (display (list 1 (list 2 (list 3 4))))
 (newline)
