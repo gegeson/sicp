@@ -106,4 +106,6 @@
                      (enumerate-interval 1 board-size)))
         (queen-cols (- k 1))))))
   (queen-cols board-size))
-(display (length (queens 9)))
+(display (queens 4))
+(newline)
+(display (length (queens 8)))

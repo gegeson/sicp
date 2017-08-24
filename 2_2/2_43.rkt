@@ -6,7 +6,7 @@
 
 ;2.43
 ;11:08->11:50
-;12:00->
+;12:00->12:20
 
 (define (filter predicate sequence)
   (cond ((null? sequence) nil)
