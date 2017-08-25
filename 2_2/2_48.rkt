@@ -1,6 +1,8 @@
 #lang racket
 (require sicp)
-;16:55->17:43
+;19:30->19:40
+;19:41->
+
 (define (make-vect x y) (cons x y))
 (define (xcor-vect v) (car v))
 (define (ycor-vect v) (cdr v))
@@ -25,15 +27,23 @@
         (vy (ycor-vect v)))
     (make-vect (* s vx) (* s vy))
   ))
+
 (define (make-frame origin edge1 edge2)
   (list origin edge1 edge2))
 (define (origin-frame frame) (car frame))
 (define (edge1-frame frame) (cadr frame))
 (define (edge2-frame frame) (caddr frame))
 
-(define (make-frame2 origin edge1 edge2)
-  (cons origin (cons edge1 edge2)))
-
-(define (origin-frame2 frame) (car frame))
-(define (edge1-frame2 frame) (cadr frame))
-(define (edge2-frame2 frame) (cddr frame))
+(define (segments->painter segment-list)
+  (lambda (frame)
+          (for-each
+           (lambda (segment)
+                   (draw-line
+                    ((frame-coord-map frame)
+                     (start-segment segment))
+                    ((frame-coord-map frame)
+                     (end-segment segment))))
+           segment-list)))
+(define (make-segment v1 v2) (cons v1 v2))
+(define (start-segment v) (car v))
+(define (end-segment v) (cdr v))

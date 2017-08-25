@@ -1,9 +1,9 @@
 #lang racket
 (require sicp)
-16:55->
+;16:55->
 (define (make-vect x y) (cons x y))
 (define (xcor-vect v) (car v))
-(define (ycor-vect v) (cadr v))
+(define (ycor-vect v) (cdr v))
 
 (define (add-vect v1 v2)
   (let ((v1_x (xcor-vect v1))
@@ -21,8 +21,8 @@
     (make-vect (- v1_x v2_x) (- v1_y v2_y))
   ))
 (define (scale-vect s v)
-  (let ((vx (xcor-vect v1))
-        (vy (ycor-vect v1)))
+  (let ((vx (xcor-vect v))
+        (vy (ycor-vect v)))
     (make-vect (* s vx) (* s vy))
   ))
 
@@ -33,6 +33,10 @@
 ;    (else
 ;      (add-vect (add-two-vect (car v_s) (cadr v_s)) (cddr v_s))
 ;      )))
-(display (add-vect '(1 2) '(3 4)))
+(display (add-vect (make-vect 1 2) (make-vect 3 4)))
+(newline)
+(display (sub-vect (make-vect 1 2) (make-vect 3 4)))
+(newline)
+(display (scale-vect 2 (make-vect 3 4)))
 (newline)
 ;(display (add-vect '(1 2) '(3 4) '(5 6)))
