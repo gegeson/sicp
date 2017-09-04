@@ -2,7 +2,7 @@
 (require sicp)
 (require racket/trace)
 ; 21:47->22:19
-; 22:24->
+; 22:24->0:06
 (define (square n)
   (* n n))
 (define (even? n)
@@ -79,8 +79,8 @@
 ;  (cond ((=number? a1 0) a2)
 ;        ((=number? a2 0) a1)
 ;        ((and (number? a1) (number? a2)) (+ a1 a2))
-;;        (else (list '+ a1 a2))))
-;
+;        (else (list '+ a1 a2))))
+
 ;(define (make-sum . a_)
 ;    (cond
 ;      ((null? a_) nil)
@@ -106,17 +106,36 @@
 (define (make-sum . a_)
   (define (make-sum-iter a_ sum)
     (cond
-      ((null? (cdr a_)) (+ sum (car a_)))
-      ((number? (car a_)) (make-sum-iter (cdr a_) (+ (car a_) sum)))
+      ((and (null? (cdr a_)) (number? (car a_)))
+        (+ sum (car a_)))
+      ((number? (car a_))
+       (make-sum-iter (cdr a_) (+ (car a_) sum)))
       (else
-          (list '+ sum a_)
+       (if (= sum 0)
+         (cons '+ a_)
+         (cons '+ sum a_)) ;後半部分が0になるとき省略すること
        )
       ))
   (trace make-sum-iter)
   (make-sum-iter a_ 0)
   )
-(trace make-sum)
-(display (make-sum 1 2 3 4 5))
+
+(define (make-sum-iter a_ sum)
+  (cond
+    ((and (null? (cdr a_)) (number? (car a_)))
+        (+ sum (car a_)))
+    ((number? (car a_))
+     (make-sum-iter (cdr a_) (+ (car a_) sum)))
+    (else
+     (if (= sum 0)
+       (list a_)
+       (list '+ sum  a_))
+     )
+    ))
+
+(display (make-sum-iter '(1 2 (+ 5 6) 3) 5))
+(newline)
+(display (make-sum 1 2 3 0 4 5 0))
 
 
 (define (make-product m1 m2)
@@ -136,10 +155,10 @@
 ;(trace deriv)
 ;(trace make-sum)
 ;(display (deriv '(** x 5) 'x))
-;(newline)
-;(display (deriv '(+ (+ (** x 2) x)  5) 'x))
-;(newline)
+(newline)
+(display (deriv '(+ (+ (** x 2) x)  5) 'x))
+(newline)
 ;(display (deriv '(+ x x x) 'x))
-;(newline)
+(newline)
 ;(display (deriv '(+ (** x 4) (** x 2)  5) 'x))
 ;(newline)
