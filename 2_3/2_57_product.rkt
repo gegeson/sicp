@@ -93,22 +93,40 @@
 
 
 ;シンプルかつ正しい版
-(define (make-sum a . a_)
-  (cond
-      ((=number? a 0) (car a_))
-      ((=number? (car a_) 0) a)
-    ((and (number? a) (number? (car a_)) (+ a (car a_))))
-    (else (list '+ a (car a_)))
-    )
-  )
+;(define (make-sum a . a_)
+;  (cond
+;      ((=number? a 0) (car a_))
+;      ((=number? (car a_) 0) a)
+;    ((and (number? a) (number? (car a_)) (+ a (car a_))))
+;    (else (list '+ a (car a_)))
+;    )
+;  )
 
-(define (make-product a . a_)
-  (cond
-    ((or (=number? a 0) (=number? (car a_) 0)) 0)
-        ((=number? a 1) (car a_))
-        ((=number? (car a_) 1) a)
-        ((and (number? a) (number? (car a_))) (* a (car a_)))
-        (else (list '* a (car a_)))))
+;衝撃の事実。make-sumはまったくいじらなくても動く（make-productも）
+;何故かと言うと、make-sum, make-productに渡される時点では第二項はひとかたまりに必ずなっているから。
+;自分で書いた上のmake-sumもそれを仮定した形になっている。
+(define (make-sum a1 a2)
+  (cond ((=number? a1 0) a2)
+        ((=number? a2 0) a1)
+        ((and (number? a1) (number? a2)) (+ a1 a2))
+        (else (list '+ a1 a2))))
+
+;(define (make-product a . a_)
+;  (cond
+;    ((or (=number? a 0) (=number? (car a_) 0)) 0)
+;        ((=number? a 1) (car a_))
+;        ((=number? (car a_) 1) a)
+;        ((and (number? a) (number? (car a_))) (* a (car a_)))
+;        (else (list '* a (car a_)))))
+
+;まったくいじらなくても動く
+(define (make-product m1 m2)
+  (cond ((or (=number? m1 0) (=number? m2 0)) 0)
+        ((=number? m1 1) m2)
+        ((=number? m2 1) m1)
+        ((and (number? m1) (number? m2)) (* m1 m2))
+        (else (list '* m1 m2))))
+
 
 (define (make-exponentiation base exp)
   (cond ((=number? exp 0) 1)

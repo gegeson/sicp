@@ -85,16 +85,23 @@
 (define (=number? exp num)
   (and (number? exp) (= exp num)))
 
+;衝撃の事実。make-sumはまったくいじらなくても動く（make-productも）
+(define (make-sum a1 a2)
+  (cond ((=number? a1 0) a2)
+        ((=number? a2 0) a1)
+        ((and (number? a1) (number? a2)) (+ a1 a2))
+        (else (list '+ a1 a2))))
+
 
 ;シンプルかつ正しい版
-(define (make-sum a . a_)
-  (cond
-      ((=number? a 0) (car a_))
-      ((=number? (car a_) 0) a)
-    ((and (number? a) (number? (car a_)) (+ a (car a_))))
-    (else (list '+ a (car a_)))
-    )
-  )
+;(define (make-sum a . a_)
+;  (cond
+;      ((=number? a 0) (car a_))
+;      ((=number? (car a_) 0) a)
+;    ((and (number? a) (number? (car a_)) (+ a (car a_))))
+;    (else (list '+ a (car a_)))
+;    )
+;  )
 
 (define (make-product m1 m2)
   (cond ((or (=number? m1 0) (=number? m2 0)) 0)
