@@ -5,6 +5,7 @@
 ; 22:24->0:06
 ; 10:30->11:08
 ; 11:27->12:06
+; 12:12->12:36
 (define (square n)
   (* n n))
 (define (even? n)
@@ -75,41 +76,18 @@
 (define (exponent s) (caddr s))
 
 
-;: (deriv '(+ x 3) 'x)
-;: (deriv '(* x y) 'x)
-;: (deriv '(* (* x y) (+ x 3)) 'x)
-
-
-;; With simplification
-
-;(define (make-sum a1 a2)
-;  (cond ((=number? a1 0) a2)
-;        ((=number? a2 0) a1)
-;        ((and (number? a1) (number? a2)) (+ a1 a2))
-;        (else (list '+ a1 a2))))
 
 
 (define (=number? exp num)
   (and (number? exp) (= exp num)))
 
-(define (elim_zero lst)
-    (cond
-      ((null? lst) nil)
-      ((equal? (car lst) 0) (elim_zero (cdr lst)))
-      (else
-        (cons (car lst) (elim_zero (cdr lst)))
-       )
-      )
-  )
 
 
 (define (make-sum a . a_)
-  (display "a is ")(display a)(newline)
-  (display "a_ is ")(display a_)(newline)
   (cond
       ((=number? a 0) (car a_))
       ((=number? (car a_) 0) a)
-    ((and (number? a) (number? a_) (+ a (car a_))))
+    ((and (number? a) (number? (car a_)) (+ a (car a_))))
     (else (list '+ a (car a_)))
     )
   )
@@ -141,6 +119,8 @@
 (display (deriv '(+ y z (** x 4) u (** x 3) v (** x 2)  5) 'x))
 (newline)
 (display (deriv '(+ (* 4 (** x 3)) (+ (* 3 (** x 2)) (* 2 x))) 'x))
+(newline)
+(display (deriv '(+ x x x z x y) 'x))
 
 
 ;ゴミ置き場（失敗作）
@@ -183,4 +163,14 @@
 ;  ;(display "ビフォー a_ ") (display a_) (newline)
 ;  ;(display "ここからmake-sum-iter ")(newline)
 ;   (make-sum-iter  (elim_zero a_) 0)
+;  )
+
+;(define (elim_zero lst)
+;    (cond
+;      ((null? lst) nil)
+;      ((equal? (car lst) 0) (elim_zero (cdr lst)))
+;      (else
+;        (cons (car lst) (elim_zero (cdr lst)))
+;       )
+;      )
 ;  )
