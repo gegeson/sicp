@@ -1,7 +1,9 @@
 #lang racket
 (require sicp)
 (require racket/trace)
-;23:00->23:11
+;23:00->23:11 a
+;23:16->0:11
+;0:16->0:38
 (define (square n)
   (* n n))
 (define (even? n)
@@ -45,11 +47,27 @@
 
 
 (define (sum? x)
-  (and (pair? x) (eq? (cadr x) '+)))
+  (or (and (pair? x) (eq? (cadr x) '+))
+      (and (pair? x) (> (length x) 4) (eq? (cadddr x) '+))))
 
-(define (addend s) (car s))
+(define (top3 s)
+    (list (car s) (cadr s) (caddr s))
+  )
+(define (addend s)
+  (cond
+    ((eq? (cadr s) '+) (car s))
+    ((eq? (cadddr s) '+) (top3 s))
+    ))
 
-(define (augend s) (caddr s))
+
+(define (augend s)
+  (define (caddddr l) (car (cddddr l)))
+  (cond
+    ((and (eq? (cadr s) '+) (> (length s) 3)) (cddr s))
+    ((and (eq? (cadr s) '+) (not (> (length s) 3))) (caddr s))
+    ((and (eq? (cadddr s) '+) (> (length s) 5)) (cddddr s))
+    (else (caddddr s))
+    ))
 
 
 (define (product? x)
@@ -57,13 +75,19 @@
 
 (define (multiplier p) (car p))
 
-(define (multiplicand p) (caddr p))
+(define (multiplicand p)
+  (if (> (length p) 3)
+    (cddr p)
+    (caddr p)))
 
 (define (exponentiation? x)
   (and (pair? x) (eq? (cadr x) '**)))
 
 (define (base s) (car s))
-(define (exponent s) (caddr s))
+(define (exponent s)
+  (if (> (length s) 3)
+    (cddr s)
+    (caddr s)))
 
 (define (=number? exp num)
   (and (number? exp) (= exp num)))
@@ -99,8 +123,26 @@
 (newline)
 (display (deriv '(y + z + (x ** 4) + u + (x ** 3) + v + (x ** 2) + 5) 'x))
 (newline)
-(display (deriv '(x + (3 * (x + (y + 2)))) 'x))
+(display (deriv '(x + 3 * (x + y + 2)) 'x))
 (newline)
+;(trace deriv)
+(display (deriv '((x + y) + (x + (x + z) + x)) 'x))
+(newline)
+(display (deriv '((x ** 2) + x * 3) 'x))
+(newline)
+(display (deriv '(x * 3 + (x ** 2)) 'x))
+(newline)
+(display (deriv '(x + 2 * (x ** 2) + x * 3) 'x))
+(newline)
+(display (deriv '(2 * (x ** 2) + x + x * 3) 'x))
+(newline)
+(display (deriv '(x + (3 * ((x * x) + (x * (y + 2))))) 'x))
+(newline)
+(display (deriv '((x * y) * (x + 3)) 'x))
+(newline)
+(display (deriv '((x ** 2) + 2 * x + 3 * 4 * x + 5) 'x))
+(newline)
+(display (deriv '((x ** 2) * 2 * 4 + 3 * 4 * 5 * x + 5) 'x))  ; =>失敗
 ;(display (deriv '(+ (* 4 (** x 3)) (+ (* 3 (** x 2)) (* 2 x))) 'x))
 ;(newline)
 ;(display (deriv '(+ x x x z x y) 'x))
