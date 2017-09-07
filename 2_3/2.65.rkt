@@ -1,0 +1,118 @@
+#lang racket
+(require sicp)
+(require racket/trace)
+; 19:52->20:10
+; 自分で解こうとする前に解答が目に入ってしまった。
+; tree->list-2がO(n), intersection-set/union-setがO(n)、list->treeもO(n)
+; だから3つを組み合わせてもO(n)、という非常にシンプルな問題。
+; 多分自分では気付かなかったと思う
+
+(define (entry tree) (car tree))
+(define (left-branch tree) (cadr tree))
+(define (right-branch tree) (caddr tree))
+(define (make-tree entry left right)
+  (list entry left right))
+
+(define (element-of-set x set)
+    (cond
+        ((null? set) #f)
+        ((= x (entry set)) true)
+        ((> x (entry set))
+         (element-of-set x (right-branch set)))
+         ((< x (entry set))
+          (element-of-set x (left-branch set)))
+      )
+  )
+(define (adjoin-set x set)
+  (cond
+      ((null? set) (make-tree x nil nil))
+      ((= x (entry set)) set)
+      ((> x (entry set))
+       (make-tree (entry set)
+                  (left-branch set)
+        (adjoin-set x (right-branch set))))
+      ((< x (entry set))
+       (make-tree (entry set)
+        (adjoin-set x (left-branch set))
+        (right-branch set)))
+    )
+  )
+
+(define (tree->list-1 tree)
+    (if (null? tree)
+      nil
+      (append (tree->list-1 (left-branch tree))
+              (cons (entry tree)
+                    (tree->list-1
+                     (right-branch tree)))))
+  )
+(define (tree->list-2 tree)
+    (define (copy-to-list tree result-list)
+      (if (null? tree)
+        result-list
+        (copy-to-list (left-branch tree)
+                      (cons (entry tree)
+                            (copy-to-list
+                             (right-branch tree)
+                             result-list)))))
+  (copy-to-list tree '())
+  )
+
+
+(define (list->tree elements)
+  (car (partial-tree elements (length elements))))
+
+(define (partial-tree elts n)
+  (if (= n 0)
+      (cons '() elts)
+      (let ((left-size (quotient (- n 1) 2)))
+        (let ((left-result (partial-tree elts left-size)))
+          (let ((left-tree (car left-result))
+                (non-left-elts (cdr left-result))
+                (right-size (- n (+ left-size 1))))
+            (let ((this-entry (car non-left-elts))
+                  (right-result (partial-tree (cdr non-left-elts)
+                                              right-size)))
+              (let ((right-tree (car right-result))
+                    (remaining-elts (cdr right-result)))
+                (cons (make-tree this-entry left-tree right-tree)
+                      remaining-elts))))))))
+
+(define (intersection-set set1 set2)
+    (cond
+        ((or (null? set1) (null? set2))
+         nil)
+         ((equal? (car set1) (car set2))
+          (cons (car set1) (intersection-set (cdr set1) (cdr set2))))
+          ((> (car set1) (car set2))
+           (intersection-set set1 (cdr set2)))
+           (else
+             (intersection-set (cdr set1) set2)
+            )
+      )
+  )
+
+(define (union-set set1 set2)
+    (cond
+        ((or (null? set1) (null? set2)) (append set1 set2))
+        ((equal? (car set1) (car set2))
+         (cons (car set1) (union-set (cdr set1) (cdr set2))))
+         ((< (car set1) (car set2))
+          (cons (car set1) (union-set (cdr set1) set2)))
+          ((> (car set1) (car set2))
+           (cons (car set2) (union-set set1 (cdr set2))))
+      )
+  )
+(define (intersection-tree tree1 tree2)
+    (list->tree (intersection-set (tree->list-2 tree1) (tree->list-2 tree2)))
+  )
+(define (union-tree tree1 tree2)
+    (list->tree (union-set (tree->list-2 tree1) (tree->list-2 tree2)))
+  )
+(define tree1 (adjoin-set 5 (adjoin-set 1 (adjoin-set 12 (adjoin-set 9 (adjoin-set 3 (make-tree 6 nil nil)))))))
+(define tree2  (adjoin-set 5 (adjoin-set 9 (adjoin-set 7 (adjoin-set 1 (make-tree 3 nil nil))))))
+(define tree3  (adjoin-set 11 (adjoin-set 7 (adjoin-set 9 (adjoin-set 1 (adjoin-set 3 (make-tree 5 nil nil)))))))
+(display (intersection-tree tree1 tree2))
+(newline)
+(display (union-tree tree1 tree2))
+(newline)
