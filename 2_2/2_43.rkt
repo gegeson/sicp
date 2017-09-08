@@ -99,11 +99,11 @@
 	  (enumerate-interval 1 board-size)))))
   (queen-cols board-size))
 
-(newline)
-(define start2 (runtime))
-(display (length (queens2 8)))
-(newline)
-(display (- (runtime) start2))
+;(newline)
+;(define start2 (runtime))
+;(display (length (queens2 8)))
+;(newline)
+;(display (- (runtime) start2))
 
 ;通常版→queen-cols*8
 ;失敗版→queen-cols呼び出し 8**7
