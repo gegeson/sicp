@@ -4,7 +4,7 @@
 ;8:14->8:24
 ;8:27->8:40
 ;9:03->
-(provide make-code-tree make-leaf decode)
+(provide leaf? right-branch left-branch symbols make-code-tree make-leaf decode)
 (define (make-leaf symbol weight)
   (list 'leaf symbol weight))
 
