@@ -4,7 +4,9 @@
 ;8:14->8:24
 ;8:27->8:40
 ;9:03->
-(provide weight make-leaf-set leaf? right-branch left-branch symbols make-code-tree make-leaf decode)
+(provide adjoin-set weight make-leaf-set leaf? right-branch left-branch symbols make-code-tree make-leaf decode)
+(define (entry tree) (car tree))
+
 (define (make-leaf symbol weight)
   (list 'leaf symbol weight))
 
