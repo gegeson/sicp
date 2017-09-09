@@ -1,0 +1,46 @@
+#lang racket
+(require racket/trace)
+
+(define (last-pair l)
+  (if (null? (cdr l))
+      (car l)
+      (last-pair (cdr l))))
+(display (last-pair (list 23 72 149 34)))
+
+(newline)
+
+(define (del_last l)
+  (if (null? (cdr l))
+    '()
+    (cons (car l) (del_last (cdr l)))))
+
+(define (reverse l)
+  (if (null? l)
+      '()
+    (cons (last-pair l) (reverse (del_last l))))
+  )
+(define (reverse2 l)
+  (define (rev_acm lst ret)
+    (if (null? lst)
+      ret
+      (rev_acm (cdr lst) (cons (car lst) ret)))
+    )
+  (rev_acm l '()))
+;(display (reverse (list 1 4 9 16 25)))
+;(newline)
+(define (append lst1 lst2)
+  (if (null? lst1)
+    lst2
+    (cons (car lst1) (append (cdr lst1) lst2)))
+  )
+(define (reverse3 lst)
+  (if (null? (cdr lst))
+    lst
+    (append (reverse3 (cdr lst)) (list (car lst))))
+  )
+;(display (append (list 1 2 3) (list 4 5 6)))
+(newline)
+(display (reverse3 '(1 2 3 4 5 6 7 8)))
+;(display "acm")
+;(display (reverse2 (list 1 4 9 16 25)))
+;(newline)
