@@ -54,7 +54,7 @@
 (newline)
 (display (generate-huffman-tree '((A 4) (B 2) (C 1) (D 1))))
 (newline)
-;一致。成功！
+;一致。成功?
 ;(display "generate-huffman-tree ")
 ;(newline)
 ;;図2.18でも検証
