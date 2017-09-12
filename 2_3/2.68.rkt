@@ -3,7 +3,7 @@
 (require racket/trace)
 (require "2_3/2.67lib.rkt")
 ;12:06->12:09
-;2.68別解でも正しく動いているが、要件とは異なるので、やり直し
+;2.68別解でも正しく動いているが、要件とは異なるので、やり直した。
 
 (define (encode message tree)
   (if (null? message)

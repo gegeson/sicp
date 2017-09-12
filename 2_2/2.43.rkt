@@ -112,6 +112,6 @@
 ;8*(queen-cols 7)
 ;= 8* 8* (queen-cols 6)
 ;=…
-;=8**8*(queen-cols 0)
+;=8**7*(queen-cols 0)
 ;(通常版の計算量)
-;= 8**2(queen-cols 0)
+;= 8*(queen-cols 0)

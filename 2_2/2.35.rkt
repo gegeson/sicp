@@ -44,11 +44,17 @@
     (else (append (f (car t)) (f (cdr t))))
     ))
 
+;これと上のfは自分で書いたもの。
+;間違いではなく、正しく動くが、明らかに出題者の意図とは違う。
 (define (count-leaves2 t)
   (accumulate
    (lambda (x y)
            (+ (length x) y)) 0 (map f t)))
 
+
+;ググって出てきた模範解答。
+;mapの中で再帰は不可能ではないか？と思っていて選択肢から除外していたが、
+;よく考えれば条件分岐をmapに渡す関数に入れてやれば普通に可能である。
 (define (count-leaves3 t)
   (accumulate + 0
               (map (lambda (t)
