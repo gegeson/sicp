@@ -3,10 +3,21 @@
 (require racket/trace)
 (require "2_4/2.4.3lib.rkt")
 ;derivパッケージ関係は既に解いたものや本文からコピペ
+;11:09->11:10
+;putに渡す順序変えるだけでOK
 
-;10:01->10:13
-;10:16->10:26
-;10:30->10:39
+(define (square n)
+  (* n n))
+(define (even? n)
+    (= (remainder n 2) 0))
+
+(define (fast-expt b n)
+  (cond ((= n 0) 1)
+        ((even? n) (square (fast-expt b (/ n 2))))
+        (else (* b (fast-expt b (- n 1))))))
+
+
+;
 
 ;これと同じ機能を目指す
 ;(define (deriv exp var)
@@ -29,18 +40,19 @@
 
 (define (install-deriv-package)
   (define (addend s) (car s))
-
   (define (augend s)
     (if (< (length (cdr s)) 2)
         (cadr s)
         (cons '+ (cdr s))))
 
   (define (multiplier p) (car p))
-
   (define (multiplicand p)
     (if (< (length (cdr p)) 2)
         (cadr p)
         (cons '* (cdr p))))
+
+  (define (base s) (car s))
+  (define (exponent s) (cadr s))
 
   (define (make-sum a1 a2)
     (cond ((=number? a1 0) a2)
@@ -58,6 +70,14 @@
           ((and (number? m1) (number? m2)) (* m1 m2))
           (else (list '* m1 m2))))
 
+  (define (make-exponentiation base exp)
+    (cond ((=number? exp 0) 1)
+          ((=number? exp 1) base)
+          ((and (number? base) (number? exp)) (fast-expt base exp))
+      (else (list '** base exp))
+      )
+    )
+
   (define (deriv-sum exp var)
     (make-sum (deriv (addend exp) var)
               (deriv (augend exp) var))
@@ -70,15 +90,22 @@
      (make-product (deriv (multiplier exp) var)
                    (multiplicand exp)))
     )
-  (put 'deriv '+ deriv-sum)
-  (put 'deriv '* deriv-product)
+
+  (define (deriv-exponetion exp var)
+    (make-product (exponent exp)
+    (make-product
+     (make-exponentiation (base exp) (- (exponent exp) 1))
+     (deriv (base exp) var))))
+
+  (put '+ 'deriv deriv-sum)
+  (put '* 'deriv deriv-product)
+  (put '** 'deriv deriv-exponetion)
   'done)
 
 (define (deriv exp var)
-
    (cond ((number? exp) 0)
          ((variable? exp) (if (same-variable? exp var) 1 0))
-         (else ((get 'deriv (operator exp)) (operands exp)
+         (else ((get (operator exp) 'deriv) (operands exp)
                                             var))))
 
 (define (operator exp) (car exp))
@@ -88,12 +115,15 @@
 (install-deriv-package)
 (display (deriv '(* 3 x (+ 4 x)) 'x))
 ;=>(* 3 (+ x (+ 4 x)))
-;簡約は出来てないが成功している模様。
 (newline)
 (display (deriv '(* x y 2 (+ x z)) 'x))
 ;=>(+ (* x (* y 2)) (* y (* 2 (+ x z))))
-;同じく。
 (newline)
 (display (deriv '(* x y (+ x 3)) 'x))
 ;=>(+ (* x y) (* y (+ x 3)))
-;問題なしかな？
+(newline)
+(display (deriv '(** x 2) 'x))
+;=>(* 2 x)
+(newline)
+(display (deriv '(* x y (+ (** x 2) 3)) 'x))
+;=>(+ (* x (* y (* 2 x))) (* y (+ (** x 2) 3)))
