@@ -1,7 +1,7 @@
 #lang racket/load
 (require sicp)
 (require racket/trace)
-(require "2_4/2.4.3lib.rkt")
+(require "2_4/get_put.rkt")
 ;derivパッケージ関係は既に解いたものや本文からコピペ
 ;5m
 

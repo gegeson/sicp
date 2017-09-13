@@ -1,7 +1,7 @@
 #lang racket/load
 (require sicp)
 (require racket/trace)
-(require "2_4/2.4.3lib.rkt")
+(require "2_4/get_put.rkt")
 ;時間不明。10分ぐらい？
 ;; EXERCISE 2.73
 (define (deriv exp var)
