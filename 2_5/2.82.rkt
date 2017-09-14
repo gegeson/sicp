@@ -1,7 +1,8 @@
 #lang racket/load
 (require sicp)
 (require racket/trace)
-;9:19->
+;9:19->10:12
+;10:30->
 (define (attach-tag type-tag contents)
   (cons type-tag contents))
 
@@ -71,14 +72,6 @@
 ;;;;  generic operators
 ;;;; ---------------------------
 
-(define (apply-generic op . args)
-  (let ((type-tags (map type-tag args)))
-    (let ((proc (get op type-tags)))
-      (if proc
-          (apply proc (map contents args))
-          (error
-            "No method for these types -- APPLY-GENERIC"
-            (list op type-tags))))))
 
 (define (add x y) (apply-generic 'add x y))
 (define (sub x y) (apply-generic 'sub x y))
@@ -317,14 +310,16 @@
 
 
 (define (apply-generic op . args)
-  (let ((type-tags (map type-tag args)))
-    (let ((proc (get op type-tags)))
-      (if proc
+  (if (pair? (car args))
+    (car args)
+    (let ((type-tags (map type-tag args)))
+      (let ((proc (get op type-tags)))
+        (if proc
           (apply proc (map contents args))
           (if (> (length args) 1)
             (apply-generic op (coercion args))
-              (error "No method for these types"
-                     (list op type-tags)))))))
+            (error "No method for these types"
+                   (list op type-tags))))))))
 
 (define (all_equal a args)
   (cond
@@ -355,8 +350,6 @@
     )))
 )
 
-(display (coercion (make-complex-from-real-imag 2 3) 2))
-(newline)
 (display (add (make-complex-from-real-imag 2 3) 2))
 ;引数として渡される型が、
 ;型の塔の昇順に並んでいる場合はこの規則で型変換してもよいが、
