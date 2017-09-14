@@ -1,10 +1,8 @@
 #lang racket/load
 (require sicp)
 (require racket/trace)
-;9:19->10:12
-;10:30->11:12
-;わからん。再帰で可変長引数として渡すにはどうすればいいの…？
-;->無理矢理に近いが出来た。
+;13:31->14:01
+;todo:apply-genericでは引数が1つのときだけ特別扱いするべし
 
 (define (attach-tag type-tag contents)
   (cons type-tag contents))
@@ -325,7 +323,9 @@
             (apply-generic-iter op (coercion args))
           (error "No method for these types"
                  (list op type-tags)))))))
-    (apply-generic-iter op args))
+  (if (= (length args) 1)
+    (apply-generic-iter op (car args))
+    (apply-generic-iter op args)))
 
 (define (all_equal a args)
   (cond
@@ -356,46 +356,25 @@
     )))
 )
 
-;(display (add (make-complex-from-real-imag 2 3) 2))
-;(newline)
-;(display (add 2 2))
-;(newline)
-;(display (add (make-complex-from-real-imag 2 3) (make-complex-from-real-imag 2 3)))
-;(newline)
-
-;以下のテスト用コードは以下から拝借したもの
-;http://www.serendip.ws/archives/1070
-(put 'add '(scheme-number scheme-number scheme-number)
-     (lambda (x y z) (+ x y z)))
-
-(put 'add '(complex complex complex)
-     (lambda (x y z) (add (add (cons 'complex x)
-                               (cons 'complex y))
-                          (cons 'complex z))))
-
-(define (add . args) (apply apply-generic (cons 'add args)))
-;ここまで拝借
-
-;(display (add (make-complex-from-real-imag 2 3) 2 2))
-;(newline)
-;(display (add 2 2 2))
-
-;引数として渡される型が、
-;型の塔の昇順に並んでいる場合はこの規則で型変換してもよいが、
-;そうでない場合、例えば
-;整数, 複素数, 有理数, 実数
-;と並んでいたら、型変換の結果は
-;整数, 複素数, 複素数, 複素数
-;となってしまう。
-;この時、addを適用しようとすると、
-;第一引数と第二引数が整数・複素数であり、
-;これに対応する型変換関数（つまり、複素数を整数に変換する型変換関数）
-;は存在しないので、失敗する。
-
-(put 'add '(scheme-number complex scheme-number)
-     (lambda (x y z) (add (add x
-                               (cons 'complex y))
-                          z)))
+(define (raise x)
+  (let ((tag (type-tag x)))
+    (cond
+        ((equal? tag 'complex)
+         (error "複素数の上はない"))
+         ((equal? tag 'scheme-number)
+          (make-complex-from-real-imag (contents x) 0))
+          ((equal? tag 'rational)
+           (display (contents x))(newline)
+            (/ (numer (contents x)) (denom (contents x))))
+          ((equal? tag 'integer)
+           (make-rational (contents x) 1))
+           (else
+             (error "異常な型です")
+            )
+      ))
+  )
+;(trace contents)
+(display (raise 1))
 (newline)
-(display (add 2 (make-complex-from-real-imag 2 3) 2))
-;少し違うが、整数、複素数、整数のこれは確かにメソッドが見つからずに失敗している。
+(display (raise (make-rational 2 3)))
+(newline)
