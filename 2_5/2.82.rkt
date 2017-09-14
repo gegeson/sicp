@@ -5,6 +5,7 @@
 ;10:30->11:12
 ;わからん。再帰で可変長引数として渡すにはどうすればいいの…？
 ;->無理矢理に近いが出来た。
+;ん？出来てない…？と思ったがそれは単に2.83のraiseがおかしかっただけらしい。
 
 (define (attach-tag type-tag contents)
   (cons type-tag contents))

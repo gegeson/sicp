@@ -2,29 +2,21 @@
 (require sicp)
 (require racket/trace)
 ;13:31->14:01
-;17:20->17:58（ギブアップ）
-;進展なし、ギブアップ。カンニング。
-;参照URL
-;www.serendip.ws/archives/1075
-;apply-genericに問題はない…だと！？
-;->そもそもデータ主導なんだから、raiseはそれぞれのパッケージに組み込むべきだった…
-;あと実数パッケージも別に用意するべきだった。
-;なぜ自分のraiseは駄目でコピペしたもの上手く行ってるのかは今度考えてみる（今はよくわからない）
-;17:58->18:20
-
+;17:20->
+;失敗作。
 
 (define (attach-tag type-tag contents)
   (cons type-tag contents))
 
 (define (type-tag datum)
-  ;(display "type-tag datum ")(display datum)(newline)
+  (display "type-tag datum ")(display datum)(newline)
   (cond
     ((number? datum) 'scheme-number)
     ((pair? datum) (car datum))
       (else (error "Bad tagged datum -- TYPE-TAG" datum))))
 
 (define (contents datum)
-  ;(display "contents datum ")(display datum)(newline)
+  (display "contents datum ")(display datum)(newline)
   (cond
     ((number? datum) datum)
     ((pair? datum)(cdr datum))
@@ -255,10 +247,6 @@
 
   ;; interface
   (define (tag x) (attach-tag 'rational x))
-
-  (define (raise-rat x)
-  (make-real (/ (* (numer x) 1.0) (denom x))))
-
   (put 'numer 'rational
 	   (lambda (r) (numer r)))
   (put 'denom 'rational
@@ -278,8 +266,6 @@
                (and (= (numer x) (numer y)) (= (denom x) (denom y)))))
   (put 'zero? '(rational)
        (lambda (x) (= (numer x) 0)))
-       (put 'raise '(rational)
-          (lambda (x) (raise-rat x)))
   'done)
 
 ;; constructor
@@ -310,8 +296,6 @@
        (lambda (x y) (= x y)))
   (put 'zero? '(scheme-number)
        (lambda (x) (= x 0)))
-  (put 'raise '(scheme-number)
-       (lambda (x) (make-rational x 1)))
   'done)
 
 ;; constructor
@@ -328,53 +312,26 @@
 (put-coercion 'scheme-number 'complex scheme-number->complex)
 
 
-;; 実数算術演算パッケージ
-(define (install-real-package)
-  (define (tag x)
-    (attach-tag 'real x))
-  (put 'add '(real real)
-       (lambda (x y) (tag (+ x y))))
-  (put 'sub '(real real)
-       (lambda (x y) (tag (- x y))))
-  (put 'mul '(real real)
-       (lambda (x y) (tag (* x y))))
-  (put 'div '(real real)
-       (lambda (x y) (tag (/ x y))))
-  (put 'equ? '(real real)
-       (lambda (x y) (= x y)))
-  (put '=zero? '(real)
-       (lambda (x) (= x 0.0)))
-  (put 'make 'real
-       (lambda (x) (tag x)))
-  (put 'raise '(real)
-       (lambda (x) (make-complex-from-real-imag x 0)))
-  'done)
-
-(define (make-real n)
-  ((get 'make 'real) n))
-
-(install-real-package)
-
-(define (raise x) (apply-generic 'raise x))
-
 ;ゴリ押しなやり方だが、apply-genericは可変長引数のインターフェイスとして残すが、
 ;内部でやる再帰はapply-generic-iterを使うようにすると、
 ;可変長でも対応可能になる
 (define (apply-generic op . args)
-  ;(display "apply-generic ")(display op)(display " ")(display args)(newline)
+  (display "apply-generic ")(display op)(display " ")(display args)(newline)
   (define (apply-generic-iter op args)
-    ;(display "apply-generic-iter ")(display op)(display " ")(display args)(newline)
+    (display "apply-generic-iter ")(display op)(display " ")(display args)(newline)
   (let ((type-tags (map type-tag args)))
     (let ((proc (get op type-tags)))
-      ;(display "type-tags ")(display type-tags)(newline)
-      ;(display "proc ")(display proc)(newline)
+      (display "type-tags ")(display type-tags)(newline)
+      (display "proc ")(display proc)(newline)
       (if proc
         (apply proc (map contents args))
         (if (> (length args) 1)
             (apply-generic-iter op (coercion args))
           (error "No method for these types"
                  (list op type-tags)))))))
-    (apply-generic-iter op args))
+  (if (= (length args) 1)
+    (apply-generic-iter op (car args))
+    (apply-generic-iter op args)))
 
 (define (all_equal a args)
   (cond
@@ -405,31 +362,25 @@
     )))
 )
 
-
+(define (raise x)
+  (let ((tag (type-tag x)))
+    (cond
+        ((equal? tag 'complex)
+         (error "複素数の上はない"))
+         ((equal? tag 'scheme-number)
+          (make-complex-from-real-imag (contents x) 0))
+          ((equal? tag 'rational)
+            (div (numer (contents x))
+                 (denom (contents x))))
+          ((equal? tag 'integer)
+           (make-rational (contents x) 1))
+           (else
+             (error "異常な型です")
+            )
+      ))
+  )
 ;(trace contents)
-(display (raise (make-real 5.0)))
-(newline)
 (display (raise 1))
 (newline)
 (display (raise (make-rational 2 3)))
 (newline)
-
-
-;以下ゴミ箱
-;(define (raise x)
-;  (let ((tag (type-tag x)))
-;    (cond
-;        ((equal? tag 'complex)
-;         (error "複素数の上はない"))
-;         ((equal? tag 'scheme-number)
-;          (make-complex-from-real-imag (contents x) 0))
-;          ((equal? tag 'rational)
-;            (div (numer (contents x))
-;                 (denom (contents x))))
-;          ((equal? tag 'integer)
-;           (make-rational (contents x) 1))
-;           (else
-;             (error "異常な型です")
-;            )
-;      ))
-;  )

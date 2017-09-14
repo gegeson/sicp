@@ -1,17 +1,6 @@
 #lang racket/load
 (require sicp)
 (require racket/trace)
-;13:31->14:01
-;17:20->17:58（ギブアップ）
-;進展なし、ギブアップ。カンニング。
-;参照URL
-;www.serendip.ws/archives/1075
-;apply-genericに問題はない…だと！？
-;->そもそもデータ主導なんだから、raiseはそれぞれのパッケージに組み込むべきだった…
-;あと実数パッケージも別に用意するべきだった。
-;なぜ自分のraiseは駄目でコピペしたもの上手く行ってるのかは今度考えてみる（今はよくわからない）
-;17:58->18:20
-
 
 (define (attach-tag type-tag contents)
   (cons type-tag contents))
@@ -413,23 +402,3 @@
 (newline)
 (display (raise (make-rational 2 3)))
 (newline)
-
-
-;以下ゴミ箱
-;(define (raise x)
-;  (let ((tag (type-tag x)))
-;    (cond
-;        ((equal? tag 'complex)
-;         (error "複素数の上はない"))
-;         ((equal? tag 'scheme-number)
-;          (make-complex-from-real-imag (contents x) 0))
-;          ((equal? tag 'rational)
-;            (div (numer (contents x))
-;                 (denom (contents x))))
-;          ((equal? tag 'integer)
-;           (make-rational (contents x) 1))
-;           (else
-;             (error "異常な型です")
-;            )
-;      ))
-;  )
