@@ -1,6 +1,20 @@
 #lang racket/load
 (require sicp)
 (require racket/trace)
+;21:14->21:27
+;21:29->22:28
+;方針
+;型の高さを示すリストを作り、
+;それを元に任意の二つの型の高さを比較する関数を作る
+;また、与えられた複数の型から、
+;一番高い位置にある型はどれかを見つける関数も作る
+;型が最大の変数と全ての変数を受け取り、
+;それそれが最大のものと型が一致するまでraiseを繰り返す関数
+
+;all_equal, coercion-iter, coercionを削除
+;uniform-height, highestなどを追加
+;apply-generic書き換え
+;higher? how-highは不要だったが、一応残しておこう
 
 (define (attach-tag type-tag contents)
   (cons type-tag contents))
@@ -309,12 +323,7 @@
 
 (install-scheme-number-package)
 
-;; Coercion
 
-(define (scheme-number->complex n)
-  (make-complex-from-real-imag (contents n) 0))
-
-(put-coercion 'scheme-number 'complex scheme-number->complex)
 
 
 ;; 実数算術演算パッケージ
@@ -352,53 +361,135 @@
 (define (apply-generic op . args)
   ;(display "apply-generic ")(display op)(display " ")(display args)(newline)
   (define (apply-generic-iter op args)
-    ;(display "apply-generic-iter ")(display op)(display " ")(display args)(newline)
   (let ((type-tags (map type-tag args)))
     (let ((proc (get op type-tags)))
-      ;(display "type-tags ")(display type-tags)(newline)
-      ;(display "proc ")(display proc)(newline)
       (if proc
         (apply proc (map contents args))
-        (if (> (length args) 1)
-            (apply-generic-iter op (coercion args))
-          (error "No method for these types"
-                 (list op type-tags)))))))
+        (apply-generic-iter op (uniform-height (highest? args) args))))))
     (apply-generic-iter op args))
 
-(define (all_equal a args)
+(define type-tower '(complex real rational scheme-number))
+
+(define (how-high t tower)
+    (cond
+        ((null? tower) (error "設定されていない型です" t))
+        ((equal? t (car tower)) (length tower))
+        (else
+          (how-high t (cdr tower))
+         )
+      )
+  )
+(define (higher? a1 a2)
+(let ((t1-height (how-high (type-tag a1) type-tower))
+      (t2-height (how-high (type-tag a2) type-tower)))
+  (if (> t1-height t2-height)
+       a1
+      a2
+      )
+    )
+  )
+(define (highest? args)
+  (define (highest-iter1 args type)
+        (cond
+          ((null? args) nil)
+          ((equal? (type-tag (car args)) type) (car args))
+          (else
+            (highest-iter1 (cdr args) type)
+           )
+          )
+    )
+  (define (highest-iter2 args tower)
+    (cond
+      ((null? tower) (error "異常な型" args))
+      (else
+       (let ((highest (highest-iter1 args (car tower))))
+          (if (null? highest)
+            (highest-iter2 args (cdr tower))
+            highest)
+         ))
+    ))
+  (highest-iter2 args type-tower)
+)
+
+(define (uniform-height highest other)
+  (define (uniform-height-iter highest another)
+    (if (equal? (type-tag highest) (type-tag another))
+      another
+      (uniform-height-iter highest (raise another))
+      )
+    )
   (cond
-    ((null? args) #t)
-    ((eq? a (car args)) (all_equal a (cdr args)))
-    (else #f)
+    ((null? other) nil)
+    (else (cons (uniform-height-iter highest (car other))
+                (uniform-height highest (cdr other))))
     )
   )
 
-(define (coercion args)
-  (let ((type-tags (map type-tag args)))
-    (cond
-      ((null? type-tags) nil)
-      ((= (length type-tags) 1) args)
-      ((all_equal (car type-tags) (cdr type-tags)) args)
-      (else
-       (cons (car args) (coercion-iter (car args) (cdr args)))
-       )
-      ))
-  )
+;以下のテスト用コードは以下から拝借したもの
+;http://www.serendip.ws/archives/1070
+(put 'add '(scheme-number scheme-number scheme-number)
+     (lambda (x y z) (+ x y z)))
 
-(define (coercion-iter a args)
-  (cond
-      ((null? args) nil)
-      (else
-       (let ((a1->a (get-coercion (type-tag (car args)) (type-tag a))))
-        (cons (a1->a (car args)) (coercion-iter a (cdr args)))
-    )))
-)
+;これは自分で追加
+(put 'add '(real real real)
+    (lambda (x y z) (+ x y z)))
+
+(put 'add '(complex complex complex)
+     (lambda (x y z) (add (add (cons 'complex x)
+                               (cons 'complex y))
+                          (cons 'complex z))))
+
+(define (add . args) (apply apply-generic (cons 'add args)))
+;ここまで拝借
+
+(define (scheme-number->scheme-number n) n)
+(define (rational->rational n) n)
+(define (real->real n) n)
+(define (complex->complex z) z)
+
+(put-coercion 'scheme-number 'scheme-number
+               scheme-number->scheme-number)
+(put-coercion 'rational 'rational
+              rational->rational)
+(put-coercion 'real 'real
+              real->real)
+(put-coercion 'complex 'complex complex->complex)
+
+;; Coercion
+
+(define (scheme-number->complex n)
+  (make-complex-from-real-imag (contents n) 0))
+
+(put-coercion 'scheme-number 'complex scheme-number->complex)
 
 
-;(trace contents)
-(display (raise (make-real 5.0)))
 (newline)
-(display (raise 1))
+(display (uniform-height (make-complex-from-real-imag 2 2) (list (make-real 2))))
 (newline)
-(display (raise (make-rational 2 3)))
+(display (add (make-real 2) (make-rational 1 2) (make-complex-from-real-imag 2 2)))
 (newline)
+(display (add (make-scheme-number 1) (make-rational 2 5) (make-real 2.1)))
+;出来てる！
+
+;テストコードを拝借
+;http://www.serendip.ws/archives/1087
+(define i 2)
+(define r (make-real 2.0))
+(define ra (make-rational 1 2))
+(define c (make-complex-from-real-imag 1 3))
+
+(newline)
+(display (add i r))
+(newline)
+(display (add i ra))
+(newline)
+(display (add r c))
+;出来てる！
+
+;テストコードを拝借
+;http://uents.hatenablog.com/entry/sicp/024-ch2.5.2.md
+(newline)
+(display (add (make-complex-from-real-imag 1 0)
+             (add (make-scheme-number 2)
+                  (add (make-rational 3 1) (make-scheme-number 4)))))
+;これもできてる。完璧だ

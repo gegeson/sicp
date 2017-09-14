@@ -406,12 +406,35 @@
 )
 
 
+(put 'add '(scheme-number scheme-number scheme-number)
+     (lambda (x y z) (+ x y z)))
+
+(put 'add '(complex complex complex)
+     (lambda (x y z) (add (add (cons 'complex x)
+                               (cons 'complex y))
+                          (cons 'complex z))))
+
+(define (add . args) (apply apply-generic (cons 'add args)))
+;
+(define (scheme-number->scheme-number n) n)
+(define (complex->complex z) z)
+
+(put-coercion 'scheme-number 'scheme-number
+               scheme-number->scheme-number)
+(put-coercion 'complex 'complex complex->complex)
+
+;ここまで拝借
+
 ;(trace contents)
-(display (raise (make-real 5.0)))
+(display (add
+          (make-complex-from-real-imag 1 2)
+          (raise (make-real 5.0))
+                 (raise (raise (make-rational 2 3)))))
+;これが可能なので、2.84の準備は整っているはず
 (newline)
 (display (raise 1))
 (newline)
-(display (raise (make-rational 2 3)))
+(display (raise (raise (make-rational 2 3))))
 (newline)
 
 
