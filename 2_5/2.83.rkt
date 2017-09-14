@@ -11,6 +11,37 @@
 ;あと実数パッケージも別に用意するべきだった。
 ;なぜ自分のraiseは駄目でコピペしたもの上手く行ってるのかは今度考えてみる（今はよくわからない）
 ;17:58->18:20
+;追記
+;+45m
+;(display (raise (raise (make-rational 2 3))))
+;上が上手く行って下が駄目なので、
+;numerをここで呼び出すこととraise内で呼び出すことはどうやらわけが違うらしい
+;何が？というのはよくわからない…
+;が、括弧が余計に付く事が一因っぽい
+;(apply-generic 'numer (rational 2 . 3))は機能しない
+;(display (make-real (/ (* (numer (contents (make-rational 2 3))) 1.0) (denom (contents (make-rational 2 3))))))
+;疑問点解決。
+;以下URLより、こんな簡約式を見つけた。
+;http://uents.hatenablog.com/entry/sicp/020-ch2.4.3.1.md
+;=> (real-part '(rectanglar 4 . 3)
+;=> (apply-generic 'real-part '(rectanglar 4 . 3))
+;=> (apply (get 'real-part '(rectangular)) (map contents '((rectanglar 4 . 3)))
+;=> (apply car '((4 . 3)))
+;=> 4
+;つまり、何らかの型タグ付き引数を取る演算は必ずリストとして型タグを受け取る。
+;そうでないものが型タグ付き引数
+;生でnumerを書くと、まず
+;(define (numer r)
+;  (apply-generic 'numer r))
+;この関数を通り、
+;(put 'numer 'rational
+;   (lambda (r) (numer r)))
+;ここで定義したlambdaに移動し、
+;(define (numer x)
+;  (car x))
+;こいつが呼ばれる、という順序。
+;(apply-generic 'numer (rational 2 . 3))
+;が機能しないのは、セットでrationalを渡す必要があるため。
 
 
 (define (attach-tag type-tag contents)
@@ -95,7 +126,8 @@
 (define (magnitude-part z) (apply-generic 'magnitude-part z))
 (define (angle-part z) (apply-generic 'angle-part z))
 
-(define (numer r) (apply-generic 'numer r))
+(define (numer r)
+  (display "out package numer ")(display r)(newline)(apply-generic 'numer r))
 (define (denom r) (apply-generic 'denom r))
 
 (define (equ? x y) (apply-generic 'equ? x y))
@@ -233,7 +265,8 @@
 
 (define (install-rational-package)
   ;; internal
-  (define (numer x) (car x))
+  (define (numer x)
+   (display "in package numer ")(display x)(newline) (car x))
   (define (denom x) (cdr x))
   (define (make-rat n d)
     (let ((g (gcd n d)))
@@ -278,8 +311,8 @@
                (and (= (numer x) (numer y)) (= (denom x) (denom y)))))
   (put 'zero? '(rational)
        (lambda (x) (= (numer x) 0)))
-       (put 'raise '(rational)
-          (lambda (x) (raise-rat x)))
+  (put 'raise '(rational)
+      (lambda (x) (raise-rat x)))
   'done)
 
 ;; constructor
@@ -361,9 +394,9 @@
 ;内部でやる再帰はapply-generic-iterを使うようにすると、
 ;可変長でも対応可能になる
 (define (apply-generic op . args)
-  ;(display "apply-generic ")(display op)(display " ")(display args)(newline)
+  (display "apply-generic ")(display op)(display " ")(display args)(newline)
   (define (apply-generic-iter op args)
-    ;(display "apply-generic-iter ")(display op)(display " ")(display args)(newline)
+    (display "apply-generic-iter ")(display op)(display " ")(display args)(newline)
   (let ((type-tags (map type-tag args)))
     (let ((proc (get op type-tags)))
       ;(display "type-tags ")(display type-tags)(newline)
@@ -424,22 +457,27 @@
 (put-coercion 'complex 'complex complex->complex)
 
 ;ここまで拝借
-
-;(trace contents)
-(display (add
-          (make-complex-from-real-imag 1 2)
-          (raise (make-real 5.0))
-                 (raise (raise (make-rational 2 3)))))
-;これが可能なので、2.84の準備は整っているはず
+;(display (add
+;          (make-complex-from-real-imag 1 2)
+;          (raise (make-real 5.0))
+;                 (raise (raise (make-rational 2 3)))))
+;;これが可能なので、2.84の準備は整っているはず
+;(newline)
+;(display (raise 1))
+;(newline)
+;(display (raise (raise (make-rational 2 3))))
+;上が上手く行って下が駄目なので、
+;numerをここで呼び出すこととraise内で呼び出すことはどうやらわけが違うらしい
+;何が？というのはよくわからない…
+;が、括弧が余計に付く事が一因っぽい
 (newline)
-(display (raise 1))
-(newline)
-(display (raise (raise (make-rational 2 3))))
-(newline)
-
-
+;(display (make-real (/ (* (numer (make-rational 2 3)) 1.0) (denom (make-rational 2 3)))))
+;上の式は以下の式に簡約されるが、以下の式は動かないので、ここが原因
+;(apply-generic 'numer '(rational 2 3))
+(apply-generic 'numer 'rational 2 3)
 ;以下ゴミ箱
 ;(define (raise x)
+
 ;  (let ((tag (type-tag x)))
 ;    (cond
 ;        ((equal? tag 'complex)
