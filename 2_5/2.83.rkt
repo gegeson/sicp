@@ -315,6 +315,7 @@
 ;内部でやる再帰はapply-generic-iterを使うようにすると、
 ;可変長でも対応可能になる
 (define (apply-generic op . args)
+  (display "apply-generic ")(display op)(display " ")(display args)(newline)
   (define (apply-generic-iter op args)
   (let ((type-tags (map type-tag args)))
     (let ((proc (get op type-tags)))
@@ -355,12 +356,12 @@
     )))
 )
 
-(display (add (make-complex-from-real-imag 2 3) 2))
-(newline)
-(display (add 2 2))
-(newline)
-(display (add (make-complex-from-real-imag 2 3) (make-complex-from-real-imag 2 3)))
-(newline)
+;(display (add (make-complex-from-real-imag 2 3) 2))
+;(newline)
+;(display (add 2 2))
+;(newline)
+;(display (add (make-complex-from-real-imag 2 3) (make-complex-from-real-imag 2 3)))
+;(newline)
 
 ;以下のテスト用コードは以下から拝借したもの
 ;http://www.serendip.ws/archives/1070
@@ -374,29 +375,10 @@
 
 (define (add . args) (apply apply-generic (cons 'add args)))
 ;ここまで拝借
-;
-(define (scheme-number->scheme-number n) n)
-(define (complex->complex z) z)
 
-(put-coercion 'scheme-number 'scheme-number
-               scheme-number->scheme-number)
-(put-coercion 'complex 'complex complex->complex)
-
-(display (add (make-complex-from-real-imag 2 3) 2 2))
-(newline)
-(display (add (make-complex-from-real-imag 2 3) (make-complex-from-real-imag 2 3) 2))
-(newline)
-(display (add 2 2 2))
-
-;complex->complexが必要な理由
-;もし単に(add 複素数、整数1、整数2）とするなら問題はない。
-;coercionは第一引数と第二引数以降から一つずつ選んで
-;型変換関数を探す、という手順を踏むので、
-;この場合は複素数と整数1、複素数と整数2の組み合わせを調べることになる。
-;しかし、(add 複素数1、複素数2、整数)とする場合は、
-;複素数1と複素数2、複素数1と整数、という組み合わせで型変換関数を探すことになる。
-;これをやりたい場合、複素数同士を受け取り型変換する関数がないと出来ないので、
-;ここで必要になる。
+;(display (add (make-complex-from-real-imag 2 3) 2 2))
+;(newline)
+;(display (add 2 2 2))
 
 ;引数として渡される型が、
 ;型の塔の昇順に並んでいる場合はこの規則で型変換してもよいが、
@@ -410,7 +392,10 @@
 ;これに対応する型変換関数（つまり、複素数を整数に変換する型変換関数）
 ;は存在しないので、失敗する。
 
+(put 'add '(scheme-number complex scheme-number)
+     (lambda (x y z) (add (add x
+                               (cons 'complex y))
+                          z)))
 (newline)
-;(display (add 2 (make-complex-from-real-imag 2 3) 2))
+(display (add 2 (make-complex-from-real-imag 2 3) 2))
 ;少し違うが、整数、複素数、整数のこれは確かにメソッドが見つからずに失敗している。
-;

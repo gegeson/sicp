@@ -2,6 +2,8 @@
 (require sicp)
 (require racket/trace)
 ;22:53->23:09
+;諸事情で本質でないものもまとめてるのでこの辺からファイルが長く、回答部分を探すのが困難
+;でも大体下にある
 
 (define (attach-tag type-tag contents)
   (cons type-tag contents))
