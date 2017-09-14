@@ -2,10 +2,7 @@
 (require sicp)
 (require racket/trace)
 ;9:19->10:12
-;10:30->10:59
-;わからん。再帰で可変長引数として渡すにはどうすればいいの…？
-;->無理矢理に近いが出来た
-
+;10:30->
 (define (attach-tag type-tag contents)
   (cons type-tag contents))
 
@@ -310,60 +307,29 @@
 
 (put-coercion 'scheme-number 'complex scheme-number->complex)
 
-
-;ゴリ押しなやり方だが、apply-genericは可変長引数のインターフェイスとして残すが、
-;内部でやる再帰はapply-generic-iterを使うようにすると、
-;可変長でも対応可能になる
 (define (apply-generic op . args)
-  (define (apply-generic-iter op args)
   (let ((type-tags (map type-tag args)))
     (let ((proc (get op type-tags)))
       (if proc
-        (apply proc (map contents args))
-        (if (> (length args) 1)
-            (apply-generic-iter op (coercion args))
-          (error "No method for these types"
-                 (list op type-tags)))))))
-    (apply-generic-iter op args))
+          (apply proc (map contents args))
+          (if (= (length args) 2)
+              (let ((type1 (car type-tags))
+                    (type2 (cadr type-tags))
+                    (a1 (car args))
+                    (a2 (cadr args)))
+                    (if (eq? type1 type2)
+                      (error "No method for these types" (list op type-tags))
+                             (let ((t1->t2 (get-coercion type1 type2))
+                                   (t2->t1 (get-coercion type2 type1)))
+                               (cond
+                                 (t1->t2
+                                  (apply-generic op (t1->t2 a1) a2))
+                                 (t2->t1
+                                  (apply-generic op a1 (t2->t1 a2)))
+                                 (else
+                                  (error "No method for these types"
+                                         (list op type-tags))
+                                  )))))
 
-(define (all_equal a args)
-  (cond
-    ((null? args) #t)
-    ((eq? a (car args)) (all_equal a (cdr args)))
-    (else #f)
-    )
-  )
-
-(define (coercion args)
-  (let ((type-tags (map type-tag args)))
-    (cond
-      ((null? type-tags) nil)
-      ((= (length type-tags) 1) args)
-      ((all_equal (car type-tags) (cdr type-tags)) args)
-      (else
-       (cons (car args) (coercion-iter (car args) (cdr args)))
-       )
-      ))
-  )
-
-(define (coercion-iter a args)
-  (cond
-      ((null? args) nil)
-      (else
-       (let ((a1->a (get-coercion (type-tag (car args)) (type-tag a))))
-        (cons (a1->a (car args)) (coercion-iter a (cdr args)))
-    )))
-)
-
-(display (add (make-complex-from-real-imag 2 3) 2))
-(newline)
-(display (add 2 2))
-(newline)
-(display (add (make-complex-from-real-imag 2 3) (make-complex-from-real-imag 2 3)))
-;引数として渡される型が、
-;型の塔の昇順に並んでいる場合はこの規則で型変換してもよいが、
-;そうでない場合、例えば
-;整数, 複素数, 有理数, 実数
-;と並んでいたら、型変換の結果は
-;整数, 複素数, 複素数, 複素数
-;となってしまう。
+              (error "No method for these types"
+                     (list op type-tags)))))))
