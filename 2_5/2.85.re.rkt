@@ -4,28 +4,16 @@
 ;13:06->13:10(方針)
 ;13:24->13:36(project実装)
 ;13:51->14:45
-;raise-n, project-n, drop-iter, drop追加完了
+;raise-n, project-n, drop-iter, drop追加
 
 ;14:50->14:57
 ;15:00->15:31
-;16:10->16:53
-;16:58->17:30
+;16:10->16:35
 ;apply-genericでdropを使うようにすると
 ;raise, projectはdropを使う
 ;→dropではraise, projectを使う
 ;という無限ループに陥る事がわかった
 ;理由は手がかりすら掴めず、断念
-;どうやら、動かない原因は
-;apply-genericでもdropでもproject. raiseでも無いらしい
-;（解答コピペしても動かない）
-;更にいじりながら解答を読んでたら、
-;dropに#fが渡されていて、
-;projectが何も返さないケースを考慮してないことに気が付いた。
-;この時自分の実装ではそのまま返すべきなので、そう変更
-;その後、何故かdropに#tが渡されるという異常事態。
-;よく考えたらこれは、equ?の結果にdropを施していたようだった。
-;その後、調整していると再び　#fが現れ、断念。
-;多分もっと前の時点で小さなバグが積み重なっていて、ここへ来て爆発したのだろう…
 
 ;方針
 ;project（一つ下げる）とraise（一つ上げる）を使って、
@@ -42,15 +30,8 @@
 ;raise-nをdrop内で定義するとエラー…わけわからん。
 ;→なんと、raiseは上書き定義してるだけで、組み込みでraiseというエラー関数が存在するらしい。
 ;この事実恐ろしすぎるだろ…注釈に書けよ
-;→更にdropも同じく組み込みに存在
+;→更にdropもあるとか…は？
 
-(define (is-numeric x)
-  (cond
-    ((and (not (pair? x))) (number? x) #t)
-    ((not (pair? x)) #f)
-    ((and (pair? x) (symbol? (car x))) #t)
-    (else #f)
-    ))
 
 
 (define (attach-tag type-tag contents)
@@ -397,16 +378,8 @@
 
 (install-real-package)
 
-(define (raise x)
-(let ((proc (get 'raise (list (type-tag x)))))
-  (if proc
-      (proc (contents x))
-      x)))
-(define (project x)
-  (let ((proc (get 'project (list (type-tag x)))))
-    (if proc
-        (proc (contents x))
-        x)))
+(define (raise x) ((get 'raise (type-tag x)) x))
+(define (project x) ((get 'project (type-tag x)) x))
 
 (define (project-n a n)
   (display "p-n a ")(display a)(newline)
@@ -446,18 +419,14 @@
 )
 
 ;可変長でも対応可能になる
-(define (apply-generic op . args)
-  ;(display "apply-generic ")(display op)(display " ")(display args)(newline)
-  (define (apply-generic-iter op args)
-  (let ((type-tags (map type-tag args)))
-    (let ((proc (get op type-tags)))
-      (cond
-        ((and proc (is-numeric (apply proc (map contents args))))
-         (drop (apply proc (map contents args))))
-        ((and proc (not (is-numeric (apply proc (map contents args)))))
-         (apply proc (map contents args)))
-        (apply-generic-iter op (uniform-height (highest? args) args))))))
-    (apply-generic-iter op args))
+;(define (apply-generic op . args)
+;  (define (apply-generic-iter op args)
+;  (let ((type-tags (map type-tag args)))
+;    (let ((proc (get op type-tags)))
+;      (if proc
+;        (drop (apply proc (map contents args)))
+;        (apply-generic-iter op (uniform-height (highest? args) args))))))
+;    (apply-generic-iter op args))
 
 
 (define type-tower '(complex real rational scheme-number))
@@ -586,9 +555,9 @@
 
 (trace drop)
 ;(drop 1)
-(display (drop (make-complex-from-real-imag 1 2)))
+;(display (drop (make-complex-from-real-imag 1 2)))
 ;(newline)
-;(display (drop (make-complex-from-real-imag 1.2 0)))
+(display (drop (make-complex-from-real-imag 1.2 0)))
 ;(newline)
 ;(display (drop (make-complex-from-real-imag 0.5 0)))
 ;(newline)
