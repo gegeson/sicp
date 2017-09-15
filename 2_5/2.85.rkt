@@ -1,49 +1,19 @@
 #lang racket/load
 (require sicp)
 (require racket/trace)
-;13:31->14:01
-;17:20->17:58（ギブアップ）
-;進展なし、ギブアップ。カンニング。
-;参照URL
-;www.serendip.ws/archives/1075
-;apply-genericに問題はない…だと！？
-;->そもそもデータ主導なんだから、raiseはそれぞれのパッケージに組み込むべきだった…
-;あと実数パッケージも別に用意するべきだった。
-;なぜ自分のraiseは駄目でコピペしたもの上手く行ってるのかは今度考えてみる（今はよくわからない）
-;17:58->18:20
-;追記
-;+45m
-;(display (raise (raise (make-rational 2 3))))
-;上が上手く行って下が駄目なので、
-;numerをここで呼び出すこととraise内で呼び出すことはどうやらわけが違うらしい
-;何が？というのはよくわからない…
-;が、括弧が余計に付く事が一因っぽい
-;(apply-generic 'numer (rational 2 . 3))は機能しない
-;(display (make-real (/ (* (numer (contents (make-rational 2 3))) 1.0) (denom (contents (make-rational 2 3))))))
-
-;以下URLより、こんな簡約式を見つけた。
-;http://uents.hatenablog.com/entry/sicp/020-ch2.4.3.1.md
-;=> (real-part '(rectanglar 4 . 3)
-;=> (apply-generic 'real-part '(rectanglar 4 . 3))
-;=> (apply (get 'real-part '(rectangular)) (map contents '((rectanglar 4 . 3)))
-;=> (apply car '((4 . 3)))
-;=> 4
-;つまり、何らかの型タグ付き引数を取る演算は必ずリストとして型タグを受け取る。
-;そうでないものが型タグ付き引数
-;生でnumerを書くと、まず
-;(define (numer r)
-;  (apply-generic 'numer r))
-;この関数を通り、
-;(put 'numer 'rational
-;   (lambda (r) (numer r)))
-;ここで定義したlambdaに移動し、
-;(define (numer x)
-;  (car x))
-;こいつが呼ばれる、という順序。
-;(apply-generic 'numer (rational 2 . 3))
-;が機能しないのは、セットでrationalを渡す必要があるため。
-;これだけ考えても十分な理解に達しないのでやっぱり先に進もう
-
+;13:06->13:10(方針)
+;13:24->13:36(project実装)
+;方針妄想
+;project（一つ下げる）とraise（一つ上げる）を使って、
+;初期状態をinitに記録
+;projectを1回施し、それをresultにcons、その後raiseでもとに戻り、
+;初期状態と違わないかチェック。
+;違ってたらinit出力。（drop不可能）
+;同じになってたらもう一回下がる。
+;projectを2回施し、それをresultにcons、2回raise
+;違ってたら(cadr result)を出力
+;同じになってたらもう一回下がる。
+;これを下がりようがない所まで続ける
 
 (define (attach-tag type-tag contents)
   (cons type-tag contents))
@@ -127,8 +97,7 @@
 (define (magnitude-part z) (apply-generic 'magnitude-part z))
 (define (angle-part z) (apply-generic 'angle-part z))
 
-(define (numer r)
-  (display "out package numer ")(display r)(newline)(apply-generic 'numer r))
+(define (numer r) (apply-generic 'numer r))
 (define (denom r) (apply-generic 'denom r))
 
 (define (equ? x y) (apply-generic 'equ? x y))
@@ -223,7 +192,9 @@
   (define (div-complex z1 z2)
     (make-from-mag-ang (/ (magnitude-part z1) (magnitude-part z2))
                        (- (angle-part z1) (angle-part z2))))
-
+  (define (project z)
+    (make-real (real-part z))
+    )
   ;; interface
   (define (tag z) (attach-tag 'complex z))
   (put 'add '(complex complex)
@@ -244,6 +215,7 @@
   (put 'zero? '(complex)
        (lambda (x)
                (and (= (real-part x) 0) (= (imag-part x) 0))))
+  (put 'project '(complex) project)
   ;; ex 2.77
   (put 'real-part '(complex) real-part)
   (put 'imag-part '(complex) imag-part)
@@ -266,8 +238,7 @@
 
 (define (install-rational-package)
   ;; internal
-  (define (numer x)
-   (display "in package numer ")(display x)(newline) (car x))
+  (define (numer x) (car x))
   (define (denom x) (cdr x))
   (define (make-rat n d)
     (let ((g (gcd n d)))
@@ -313,7 +284,9 @@
   (put 'zero? '(rational)
        (lambda (x) (= (numer x) 0)))
   (put 'raise '(rational)
-      (lambda (x) (raise-rat x)))
+       (lambda (x) (raise-rat x)))
+  (put 'project '(rational)
+       (lambda (x) (round (/ (numer x) (denom x)))))
   'done)
 
 ;; constructor
@@ -354,12 +327,7 @@
 
 (install-scheme-number-package)
 
-;; Coercion
 
-(define (scheme-number->complex n)
-  (make-complex-from-real-imag (contents n) 0))
-
-(put-coercion 'scheme-number 'complex scheme-number->complex)
 
 
 ;; 実数算術演算パッケージ
@@ -382,6 +350,8 @@
        (lambda (x) (tag x)))
   (put 'raise '(real)
        (lambda (x) (make-complex-from-real-imag x 0)))
+  (put 'project '(real)
+       (lambda (x) (make-rational (round (* 100 x)) 100)))
   'done)
 
 (define (make-real n)
@@ -390,58 +360,80 @@
 (install-real-package)
 
 (define (raise x) (apply-generic 'raise x))
+(define (project x) (apply-generic 'project x))
 
 ;ゴリ押しなやり方だが、apply-genericは可変長引数のインターフェイスとして残すが、
 ;内部でやる再帰はapply-generic-iterを使うようにすると、
 ;可変長でも対応可能になる
 (define (apply-generic op . args)
-  (display "apply-generic ")(display op)(display " ")(display args)(newline)
+  ;(display "apply-generic ")(display op)(display " ")(display args)(newline)
   (define (apply-generic-iter op args)
-    (display "apply-generic-iter ")(display op)(display " ")(display args)(newline)
   (let ((type-tags (map type-tag args)))
     (let ((proc (get op type-tags)))
-      ;(display "type-tags ")(display type-tags)(newline)
-      ;(display "proc ")(display proc)(newline)
       (if proc
         (apply proc (map contents args))
-        (if (> (length args) 1)
-            (apply-generic-iter op (coercion args))
-          (error "No method for these types"
-                 (list op type-tags)))))))
+        (apply-generic-iter op (uniform-height (highest? args) args))))))
     (apply-generic-iter op args))
 
-(define (all_equal a args)
+(define type-tower '(complex real rational scheme-number))
+
+(define (highest? args)
+  (define (highest-iter1 args type)
+        (cond
+          ((null? args) nil)
+          ((equal? (type-tag (car args)) type) (car args))
+          (else
+            (highest-iter1 (cdr args) type)
+           )
+          )
+    )
+  (define (highest-iter2 args tower)
+    (cond
+      ((null? tower) (error "異常な型" args))
+      (else
+       (let ((highest (highest-iter1 args (car tower))))
+          (if (null? highest)
+            (highest-iter2 args (cdr tower))
+            highest)
+         ))
+    ))
+  (highest-iter2 args type-tower)
+)
+
+(define (uniform-height highest other)
+  (define (uniform-height-iter highest another)
+    (if (equal? (type-tag highest) (type-tag another))
+      another
+      (uniform-height-iter highest (raise another))
+      )
+    )
   (cond
-    ((null? args) #t)
-    ((eq? a (car args)) (all_equal a (cdr args)))
-    (else #f)
+    ((null? other) nil)
+    (else (cons (uniform-height-iter highest (car other))
+                (uniform-height highest (cdr other))))
     )
   )
 
-(define (coercion args)
-  (let ((type-tags (map type-tag args)))
-    (cond
-      ((null? type-tags) nil)
-      ((= (length type-tags) 1) args)
-      ((all_equal (car type-tags) (cdr type-tags)) args)
-      (else
-       (cons (car args) (coercion-iter (car args) (cdr args)))
-       )
-      ))
-  )
-
-(define (coercion-iter a args)
-  (cond
-      ((null? args) nil)
-      (else
-       (let ((a1->a (get-coercion (type-tag (car args)) (type-tag a))))
-        (cons (a1->a (car args)) (coercion-iter a (cdr args)))
-    )))
-)
+  ;project（一つ下げる）とraise（一つ上げる）を使って、
+  ;初期状態をinitに記録
+  ;projectを1回施し、それをresultにcons、その後raiseでもとに戻り、
+  ;初期状態と違わないかチェック。
+  ;違ってたらinit出力。（drop不可能）
+  ;同じになってたらもう一回下がる。
+  ;projectを2回施し、それをresultにcons、2回raise
+  ;違ってたら(cadr result)を出力
+  ;同じになってたらもう一回下がる。
+  ;これを下がりようがない所まで続ける
 
 
+;以下のテスト用コードは以下から拝借したもの
+;http://www.serendip.ws/archives/1070
 (put 'add '(scheme-number scheme-number scheme-number)
      (lambda (x y z) (+ x y z)))
+
+;これは自分で追加
+(put 'add '(real real real)
+    (lambda (x y z) (+ x y z)))
 
 (put 'add '(complex complex complex)
      (lambda (x y z) (add (add (cons 'complex x)
@@ -449,48 +441,44 @@
                           (cons 'complex z))))
 
 (define (add . args) (apply apply-generic (cons 'add args)))
-;
+;ここまで拝借
+
 (define (scheme-number->scheme-number n) n)
+(define (rational->rational n) n)
+(define (real->real n) n)
 (define (complex->complex z) z)
 
 (put-coercion 'scheme-number 'scheme-number
                scheme-number->scheme-number)
+(put-coercion 'rational 'rational
+              rational->rational)
+(put-coercion 'real 'real
+              real->real)
 (put-coercion 'complex 'complex complex->complex)
 
-;ここまで拝借
-;(display (add
-;          (make-complex-from-real-imag 1 2)
-;          (raise (make-real 5.0))
-;                 (raise (raise (make-rational 2 3)))))
-;;これが可能なので、2.84の準備は整っているはず
-;(newline)
-;(display (raise 1))
-;(newline)
-;(display (raise (raise (make-rational 2 3))))
-;上が上手く行って下が駄目なので、
-;numerをここで呼び出すこととraise内で呼び出すことはどうやらわけが違うらしい
-;何が？というのはよくわからない…
-;が、括弧が余計に付く事が一因っぽい
-(newline)
-;(display (make-real (/ (* (numer (make-rational 2 3)) 1.0) (denom (make-rational 2 3)))))
-;上の式は以下の式に簡約されるが、以下の式は動かないので、ここが原因
-;(apply-generic 'numer '(rational 2 3))
-;以下ゴミ箱
-;(define (raise x)
+;; Coercion
 
-;  (let ((tag (type-tag x)))
-;    (cond
-;        ((equal? tag 'complex)
-;         (error "複素数の上はない"))
-;         ((equal? tag 'scheme-number)
-;          (make-complex-from-real-imag (contents x) 0))
-;          ((equal? tag 'rational)
-;            (div (numer (contents x))
-;                 (denom (contents x))))
-;          ((equal? tag 'integer)
-;           (make-rational (contents x) 1))
-;           (else
-;             (error "異常な型です")
-;            )
-;      ))
-;  )
+(define (scheme-number->complex n)
+  (make-complex-from-real-imag (contents n) 0))
+
+(put-coercion 'scheme-number 'complex scheme-number->complex)
+
+
+(define i 2)
+(define r (make-real 2.0))
+(define ra (make-rational 1 2))
+(define c (make-complex-from-real-imag 1 3))
+(display (project c))
+(newline)
+(display (project r))
+(newline)
+(display (project ra))
+(newline)
+;(display (project i))
+(newline)
+(display (raise (project c)))
+(newline)
+(display (raise (project r)))
+(newline)
+(display (raise (project ra)))
+(newline)
