@@ -10,6 +10,11 @@
 ;15:00->15:31
 ;16:10->16:53
 ;16:58->17:30
+
+;8:05->8:21（完成）
+
+;最終的に出来たが、それまでの長い道のりを記録しておこう
+
 ;apply-genericでdropを使うようにすると
 ;raise, projectはdropを使う
 ;→dropではraise, projectを使う
@@ -26,6 +31,12 @@
 ;よく考えたらこれは、equ?の結果にdropを施していたようだった。
 ;その後、調整していると再び　#fが現れ、断念。
 ;多分もっと前の時点で小さなバグが積み重なっていて、ここへ来て爆発したのだろう…
+
+;#fや#tを返すのは明らかにdrop内部で使われるequ?である。
+;これは、equ?がapply-genericを通り、apply-generic内で返された値がdropに渡される事による。
+;じゃあ、型を持つ値以外の何かがdropに渡された時は即座に値を返すようにdropを書き換えればよいのでは？
+;とひらめいて、そうやってみたら、…成功！！！！！！
+;長すぎる戦いだった
 
 ;方針
 ;project（一つ下げる）とraise（一つ上げる）を使って、
@@ -57,7 +68,6 @@
   (cons type-tag contents))
 
 (define (type-tag datum)
-  (display "type-tag datum ")(display datum)(newline)
   (cond
     ((number? datum) 'scheme-number)
     ((pair? datum) (car datum))
@@ -409,7 +419,6 @@
         x)))
 
 (define (project-n a n)
-  (display "p-n a ")(display a)(newline)
     (cond
         ((equal? (type-tag a) 'scheme-number) a)
         ((= n 0) a)
@@ -424,7 +433,6 @@
   ))
 
 (define (drop a)
-  (display "a is ")(display a)(newline)
   (define (drop-iter a n result)
         (let ((n-down (project-n a n)))
           (let ((n-back (raise-n n-down n)))
@@ -442,7 +450,14 @@
           )
       )
     )
-  (drop-iter a 1 nil)
+  (cond
+    ((number? a) a)
+    ((not (pair? a)) a)
+    ((equal? (car a) 'scheme-number) a)
+    ((equal? (car a) 'rational) (drop-iter a 1 nil))
+    ((equal? (car a) 'real) (drop-iter a 1 nil))
+    ((equal? (car a) 'complex) (drop-iter a 1 nil))
+    (else a))
 )
 
 ;可変長でも対応可能になる
@@ -451,11 +466,8 @@
   (define (apply-generic-iter op args)
   (let ((type-tags (map type-tag args)))
     (let ((proc (get op type-tags)))
-      (cond
-        ((and proc (is-numeric (apply proc (map contents args))))
-         (drop (apply proc (map contents args))))
-        ((and proc (not (is-numeric (apply proc (map contents args)))))
-         (apply proc (map contents args)))
+      (if proc
+        (drop (apply proc (map contents args)))
         (apply-generic-iter op (uniform-height (highest? args) args))))))
     (apply-generic-iter op args))
 
@@ -584,15 +596,14 @@
 ;(display (raise-n r 1))
 ;(newline)
 
-(trace drop)
 ;(drop 1)
 (display (drop (make-complex-from-real-imag 1 2)))
-;(newline)
-;(display (drop (make-complex-from-real-imag 1.2 0)))
-;(newline)
-;(display (drop (make-complex-from-real-imag 0.5 0)))
-;(newline)
-;(display (drop (make-complex-from-real-imag 1 0)))
+(newline)
+(display (drop (make-complex-from-real-imag 1.2 0)))
+(newline)
+(display (drop (make-complex-from-real-imag 0.5 0)))
+(newline)
+(display (drop (make-complex-from-real-imag 1 0)))
 ;(newline)
 ;(display (drop (make-real 1.2)))
 ;(newline)
@@ -610,20 +621,33 @@
 ;全部うまく行ってる。
 ;よっしゃあ！
 (newline)
+
 (display "===========================================")
-;(newline)
-;(display (add 2 (make-real 2)))
-;(newline)
-;(display (drop (add 2 (make-real 2))))
-;;出来てる！
+(newline)
+(display (add 2 2))
+(newline)
+(display (add 2 (make-real 2)))
+(newline)
+(display (add (make-rational 2 5) (make-real 0.6)))
+(newline)
+(display (add (make-rational 2 5) (make-rational 1 5)))
+(newline)
+(display (add (make-complex-from-real-imag 2 1) (make-complex-from-real-imag 3 5)))
+(newline)
+(display (add (make-complex-from-real-imag 2 1) (make-complex-from-real-imag 3 (- 1))))
+(newline)
+(display (add (make-complex-from-real-imag 2.5 1) (make-complex-from-real-imag 3.2 (- 1))))
+(newline)
+(display (add (make-complex-from-real-imag 2.512 1) (make-complex-from-real-imag 3.2 (- 1))))
+;出来てる！（感動）
 ;
 ;;テストコードを拝借
 ;;http://uents.hatenablog.com/entry/sicp/024-ch2.5.2.md
-;(newline)
-;(display (add (make-complex-from-real-imag 1 0)
-;             (add (make-scheme-number 2)
-;                  (add (make-rational 3 1) (make-scheme-number 4)))))
-;(newline)
-;(display (drop (add (make-complex-from-real-imag 1 0)
-;                    (add (make-scheme-number 2)
-;                         (add (make-rational 3 1) (make-scheme-number 4))))))
+(newline)
+(display (add (make-complex-from-real-imag 1 0)
+             (add (make-scheme-number 2)
+                  (add (make-rational 3 1) (make-scheme-number 4)))))
+(newline)
+(display (drop (add (make-complex-from-real-imag 1 0)
+                    (add (make-scheme-number 2)
+                         (add (make-rational 3 1) (make-scheme-number 4))))))
