@@ -3,7 +3,12 @@
 (require racket/trace)
 ;13:06->13:10(方針)
 ;13:24->13:36(project実装)
-;方針妄想
+;13:51->14:45
+;出来たあああああああああああああああああああああ
+;raise-n, project-n, drop-iter, drop追加
+
+
+;方針
 ;project（一つ下げる）とraise（一つ上げる）を使って、
 ;初期状態をinitに記録
 ;projectを1回施し、それをresultにcons、その後raiseでもとに戻り、
@@ -14,6 +19,12 @@
 ;違ってたら(cadr result)を出力
 ;同じになってたらもう一回下がる。
 ;これを下がりようがない所まで続ける
+;
+;raise-nをdrop内で定義するとエラー…わけわからん。
+;なんと、raiseは上書き定義してるだけで、組み込みでraiseというエラー関数が存在するらしい。
+;この事実恐ろしすぎるだろ…注釈に書けよ
+
+
 
 (define (attach-tag type-tag contents)
   (cons type-tag contents))
@@ -468,17 +479,100 @@
 (define r (make-real 2.0))
 (define ra (make-rational 1 2))
 (define c (make-complex-from-real-imag 1 3))
-(display (project c))
+
+;テストコード
+;(display (project c))
+;(newline)
+;(display (project r))
+;(newline)
+;(display (project ra))
+;(newline)
+;;(display (project i))
+;(newline)
+;(display (raise (project c)))
+;(newline)
+;(display (raise (project r)))
+;(newline)
+;(display (raise (project ra)))
+;(newline)
+;(display (project-n c 1))
+;(newline)
+;(display (project-n c 2))
+;(newline)
+;(display (project-n c 3))
+;(newline)
+;(display (project-n r 1))
+;(newline)
+;(display (project-n r 2))
+;(newline)
+;(display (project-n ra 1))
+;(newline)
+;(display "raise ")
+;(display (raise-n i 1))
+;(newline)
+;(display (raise-n i 2))
+;(newline)
+;(display (raise-n i 3))
+;(newline)
+;(display (raise-n ra 1))
+;(newline)
+;(display (raise-n ra 2))
+;(newline)
+;(display (raise-n r 1))
+;(newline)
+(define (project-n a n)
+    (cond
+        ((equal? (type-tag a) 'scheme-number) a)
+        ((= n 0) a)
+        (else (project-n (project a) (- n 1)))
+      )
+)
+(define (raise-n a n)
+  (cond
+    ((equal? (type-tag a) 'complex) a)
+    ((= n 0) a)
+    (else (raise-n (raise a) (- n 1)))
+  ))
+
+  (define (drop a)
+    (define (drop-iter a n result)
+          (let ((n-down (project-n a n)))
+            (let ((n-back (raise-n n-down n)))
+              (cond
+                  ((equ? a n-back)
+                    (if (equal? (type-tag n-down) 'scheme-number)
+                        n-down
+                      (drop-iter a (+ n 1) (cons n-down result))))
+                   (else
+                    (if (= n 1)
+                      a
+                      (car result))
+                    )
+                )
+            )
+        )
+      )
+    (drop-iter a 1 nil)
+  )
+
+(display (drop (make-complex-from-real-imag 1 2)))
 (newline)
-(display (project r))
+(display (drop (make-complex-from-real-imag 1.2 0)))
 (newline)
-(display (project ra))
+(display (drop (make-complex-from-real-imag 0.5 0)))
 (newline)
-;(display (project i))
+(display (drop (make-complex-from-real-imag 1 0)))
 (newline)
-(display (raise (project c)))
+(display (drop (make-real 1.2)))
 (newline)
-(display (raise (project r)))
+(display (drop (make-real 1.31)))
 (newline)
-(display (raise (project ra)))
+(display (drop (make-real 1.4142)))
 (newline)
+(display (drop (make-real 1.0)))
+(newline)
+(display (drop (make-rational 2 3)))
+(newline)
+(display (drop (make-rational 6 3)))
+;全部うまく行ってる。
+;よっしゃあ！
