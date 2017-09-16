@@ -18,7 +18,7 @@
 ;cos, sin, atan, sqrt, square
 ;をscheme-number, rational, realのパッケージに実装すればいいだけ。
 ;解答見たらequ?とか他にも気をつけることはあるようだったのでそれも追加
-;一応出来た
+;一応出来た。タグ付け忘れなどのバグはあった
 
 (define (square z) (apply-generic 'square z))
 (define (square-root z) (apply-generic 'square-root z))
@@ -142,7 +142,7 @@
   (define (make-from-real-imag x y)
 	(cons x y))
   (define (make-from-mag-ang r a)
-    (cons (* r (cosine a)) (* r (sine a))))
+    (cons (mul r (cosine a)) (mul r (sine a))))
 
   ;; interface
   (define (tag x) (attach-tag 'rectangular x))
@@ -276,16 +276,6 @@
   (define (div-rat x y)
     (make-rat (* (numer x) (denom y))
               (* (denom x) (numer y))))
-  (define (sine x)
-    (make-real (sin (/ (numer x) (denom x)))))
-  (define (cosine x)
-    (make-real (cos (/ (numer x) (denom x)))))
-  (define (atang x)
-    (make-real (atan (/ (numer x) (denom x)))))
-  (define (square x)
-    (make-real (/ (* (numer x) (numer x)) (* (denom x) (denom x)))))
-  (define (square-root x)
-    (make-real (/ (sqrt (numer x)) (sqrt (denom x)))))
   ;; interface
   (define (tag x) (attach-tag 'rational x))
 
@@ -315,11 +305,27 @@
        (lambda (x) (raise-rat x)))
   (put 'project '(rational)
        (lambda (x) (round (/ (numer x) (denom x)))))
-  (put 'sine '(rational) sine)
-  (put 'cosine '(rational) cosine)
-  (put 'atang '(rational rational) atang)
-  (put 'square '(rational) square)
-  (put 'square-root '(rational) square-root)
+  (put 'square '(rational)
+       (lambda (z)
+         (let ((n (numer z))
+               (d (denom z)))
+           (tag (make-rat (* n n)
+                          (* d d))))))
+  (put 'square-root '(rational)
+       (lambda (z) (tag (make-rat (sqrt (numer z))
+                                  (sqrt (denom z))))))
+  (put 'sine '(rational)
+       (lambda (z) (tag (make-rat (sin (/ (numer z) (denom z)))
+                                  1))))
+  (put 'cosine '(rational)
+       (lambda (z) (tag (make-rat (cos (/ (numer z) (denom z)))
+                                  1))))
+  (put 'atang '(rational rational)
+       (lambda (x y) (tag (make-rat (atan (/ (numer x) (denom x))
+                                          (/ (numer y) (denom y)))
+                                    1))))
+
+
   'done)
 
 ;; constructor
@@ -541,8 +547,17 @@
 (display (add (make-complex-from-real-imag (make-rational 1 2) 2)
               (make-complex-from-real-imag (make-rational 1 2) 2)))
 (newline)
-(display (magnitude-part (make-complex-from-real-imag (make-rational 1 2) 2)))
+;自分の実装ではこれらの角度がrationalのままになってしまうので、強制raiseで実数にする
+(display (raise (angle-part (make-complex-from-real-imag (make-rational 1 2) 2))))
 (newline)
-(display (magnitude-part (make-complex-from-real-imag 4 3)))
+(display (raise (angle-part (make-complex-from-real-imag (make-rational 1 2) (make-rational 1 2)))))
+(newline)
+(display (angle-part (make-complex-from-real-imag (make-real 1) (make-real (sqrt 3)))))
+(newline)
+(display (angle-part (make-complex-from-real-imag (make-rational 1 2) 0)))
+(newline)
+(display (magnitude-part (make-complex-from-real-imag 2 (make-rational 3 2))))
 (newline)
 (display (real-part (make-complex-from-mag-ang 5 0)))
+(newline)
+(display (real-part (make-complex-from-mag-ang (make-rational 2 1) 0)))
