@@ -529,26 +529,6 @@
 (define (add . args) (apply apply-generic (cons 'add args)))
 ;ここまで拝借
 
-(define (scheme-number->scheme-number n) n)
-(define (rational->rational n) n)
-(define (real->real n) n)
-(define (complex->complex z) z)
-
-(put-coercion 'scheme-number 'scheme-number
-               scheme-number->scheme-number)
-(put-coercion 'rational 'rational
-              rational->rational)
-(put-coercion 'real 'real
-              real->real)
-(put-coercion 'complex 'complex complex->complex)
-
-;; Coercion
-
-(define (scheme-number->complex n)
-  (make-complex-from-real-imag (contents n) 0))
-
-(put-coercion 'scheme-number 'complex scheme-number->complex)
-
 
 (define i 2)
 (define r (make-real 2.0))
