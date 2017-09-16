@@ -17,6 +17,7 @@
 
 ;cos, sin, atan, sqrt, square
 ;をscheme-number, rational, realのパッケージに実装すればいいだけ。
+;解答見たらequ?とか他にも気をつけることはあるようだったのでそれも追加
 ;一応出来た
 
 (define (square z) (apply-generic 'square z))
