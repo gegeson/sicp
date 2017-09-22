@@ -1,4 +1,4 @@
-#lang racket/load
+#lang debug racket
 (require sicp)
 (require racket/trace)
 ;13:06->13:10(方針)
@@ -115,8 +115,6 @@
 ;;;; type-tag system
 ;;;; ---------------------------
 
-(define (attach-tag type-tag contents)
-  (cons type-tag contents))
 
 #|
 (define (type-tag datum)
@@ -467,7 +465,7 @@
   (let ((type-tags (map type-tag args)))
     (let ((proc (get op type-tags)))
       (if proc
-        (drop (apply proc (map contents args)))
+        (drop #RR(apply proc (map contents args)))
         (apply-generic-iter op (uniform-height (highest? args) args))))))
     (apply-generic-iter op args))
 
@@ -526,7 +524,7 @@
                                (cons 'complex y))
                           (cons 'complex z))))
 
-(define (add . args) (apply apply-generic (cons 'add args)))
+;(define (add . args) (apply apply-generic (cons 'add args)))
 ;ここまで拝借
 
 
