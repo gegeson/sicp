@@ -35,6 +35,14 @@
 ;良く出来てる解答を写経
 ;http://uents.hatenablog.com/entry/sicp/027-ch3.1.md
 ;パスワード関係の処理とアカウント関係の処理を上手く分離している。
+;初期預金、初期パスワード、警察を受け取り、
+;アカウント初期化、カウンター初期化
+;パスワードとメソッドを受け取り、
+;初期パスワードとパスワードの一致を調べ、
+;一致するなら引き出し、
+;一致しなかったらカウンター++、
+;カウンターが3以上なら警察呼びだし
+;という操作
 (define (make-secure-account balance password call-the-cops)
   (let ((account (make-account balance))
         (mistake-counter 0))

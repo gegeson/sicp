@@ -1,4 +1,4 @@
-#lang racket/load
+#lang debug racket
 (require sicp)
 (require racket/trace)
 ;13:31->14:01
@@ -97,8 +97,7 @@
 ;;;; type-tag system
 ;;;; ---------------------------
 
-(define (attach-tag type-tag contents)
-  (cons type-tag contents))
+
 
 #|
 (define (type-tag datum)
@@ -407,7 +406,7 @@
         (if (> (length args) 1)
             (apply-generic-iter op (coercion args))
           (error "No method for these types"
-                 (list op type-tags)))))))
+                 (list args op type-tags)))))))
     (apply-generic-iter op args))
 
 (define (all_equal a args)
@@ -448,7 +447,6 @@
                                (cons 'complex y))
                           (cons 'complex z))))
 
-(define (add . args) (apply apply-generic (cons 'add args)))
 ;
 (define (scheme-number->scheme-number n) n)
 (define (complex->complex z) z)
@@ -466,7 +464,7 @@
 ;(newline)
 ;(display (raise 1))
 ;(newline)
-;(display (raise (raise (make-rational 2 3))))
+(display (raise (raise (make-rational 2 3))))
 ;上が上手く行って下が駄目なので、
 ;numerをここで呼び出すこととraise内で呼び出すことはどうやらわけが違うらしい
 ;何が？というのはよくわからない…
