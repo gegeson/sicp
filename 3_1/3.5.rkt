@@ -1,6 +1,9 @@
 #lang debug racket
 (require sicp)
 (require racket/trace)
+;何故か精度が悪く、random-in-rangeに問題があるとわかったので、
+;こちらを参考にした
+;http://qiita.com/cocodrips/items/45073c6d202974f37636
 
 (define (square x) (* x x))
 ;18:25->19:00
@@ -31,13 +34,19 @@
        )
       )
     )
-  (iter trials 0)
+  (iter trials 0.0)
 )
 
+;解答を参考に
+;こちらは範囲内の実数が表示される。制度がいいに決まってる
 (define (random-in-range low high)
   (let ((range (- high low)))
-    (+ low (random range))))
+    (+ low (* (random) range))))
 
+;こちらは範囲内の整数が表示される。精度が悪いに決まってる
+(define (ex-random-in-range low high)
+  (let ((range (- high low)))
+    (+ low (random range))))
 
 (define (estimate-integral p x1 x2 y1 y2 trials)
   (define ratio
@@ -58,3 +67,29 @@
 (display (/ (estimate-integral p2 -10 10 -10 10 100000) 100.0))
 ;3.15492
 (newline)
+
+;テスト手続き
+(define (ex-3.5)
+ ;; 中心(5, 7) 半径3 の円の場合
+  (define (p-test x y)
+    (<=
+      (+ (expt (- x 5) 2) (expt (- y 7) 2))
+      (expt 3 2)))
+  ;; (0, 0)の半径1の円 (piの推定)
+  (define (pi-test x y)
+    (<=
+      (+ (expt x 2) (expt y 2))
+      1))
+  (display (* 3.1415 (* 3 3)))
+  ;28.2735…
+  (newline)
+  (display (estimate-integral p-test 2 8 4 10 100000))
+  ;28.306…
+  (newline)
+  (display 3.1415)
+  (newline)
+  (display (estimate-integral pi-test -1 1 -1 1 10000000))
+  ;3.1417032
+)
+
+(ex-3.5)
