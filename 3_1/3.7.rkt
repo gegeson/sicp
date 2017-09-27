@@ -4,6 +4,7 @@
 ;21:45->21:50
 ;21:51->23:00
 ;出来た。
+;孫も作れるので完璧。
 (define (make-account balance password-init)
   (define (withdraw amount)
     (cond
@@ -54,3 +55,28 @@
 (display ((acc 'deposit "aiueo") 5000))
 (newline)
 (display ((acc 'deposit "aiuow") 5000))
+(define inu (make-joint neko "akstn" "111"))
+(newline)(display "inu")(newline)
+(display ((inu 'withdraw "111") 50))
+(newline)
+(display ((inu 'withdraw "aiueo") 50))
+(newline)
+(display ((inu 'deposit "aiueo") 5000))
+(newline)
+(display ((inu 'deposit "111") 5000))
+(newline)(display "neko")(newline)
+(display ((neko 'withdraw "akstn") 50))
+(newline)
+(display ((neko 'withdraw "aiueo") 50))
+(newline)
+(display ((neko 'deposit "111") 5000))
+(newline)
+(display ((neko 'deposit "akstn") 5000))
+(newline)(display "acc")(newline)
+(display ((acc 'withdraw "aiuoe") 50))
+(newline)
+(display ((acc 'withdraw "aiueo") 50))
+(newline)
+(display ((acc 'deposit "aiueo") 5000))
+(newline)
+(display ((acc 'deposit "111") 5000))
