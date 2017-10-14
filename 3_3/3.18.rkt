@@ -28,7 +28,8 @@
           (if (eq? x (car crumbs))
             true
             (iter (cdr crumbs)))))
-    (iter bred-crumbs))
+            (memq x bred-crumbs))
+;(iter bred-crumbs))
     (define (check-proc x)
       (cond ((not (pair? x)) false)
         ((checked-pair? x) true)
@@ -43,7 +44,7 @@
     [else (has a (cdr lst))])
   )
 
-(define (check-loop lst)
+(define (cycle-list lst)
   (define checked_lst nil)
   (define (check-sub lst)
     (cond
@@ -66,17 +67,17 @@
   (set-cdr! (last-pair x) x)
   x)
 (define z (make-cycle (list 'a 'b 'c)))
-(display (check-loop z)) ;#t
+(display (cycle-list z)) ;#t
 (newline)
-(display (check-loop (list 'a 'b 'c))) ;#f
+(display (cycle-list (list 'a 'b 'c))) ;#f
 (newline)
-(display (check-loop nil)) ;#f
+(display (cycle-list nil)) ;#f
 (newline)
-(display (check-loop (cons z '(1 2 3)))) ;#t
+(display (cycle-list (cons z '(1 2 3)))) ;#t
 (newline)
-(display (check-loop (cons '(1 2 3) z))) ;#t
+(display (cycle-list (cons '(1 2 3) z))) ;#t
 (newline)
-(display (check-loop (list 'a 'a 'a))) ;#fになるはずが#t！
+(display (cycle-list (list 'a 'a 'a))) ;#fになるはずが#t！
 (newline)
 
 ;不安なのでテストデータ拝借
@@ -95,14 +96,14 @@
 (define l6 (cadr l5))
 (printf "~a, ~a, ~a, ~a \n" l6 (car l6) (cadr l6) (caddr l6))
 ;l4, 循環はしてないけど無限再帰リストだし…ループで良いんじゃない？
-(check-loop l1)
+(cycle-list l1)
 ;#f
 
-(check-loop l2)
+(cycle-list l2)
 ;#t
 
-(check-loop l3)
+(cycle-list l3)
 ;#t
 
-(check-loop l4)
+(cycle-list l4)
 ;#f

@@ -4,31 +4,47 @@
 ;17:31->17:56,
 ;+3m
 ;+10m
+;+16m
 ;にっちもさっちも行かないので答えを見た。
 ;全部は理解できてない。
 ;答えを見たのに関わらず。
+;一番正確（l4でも#fを返す）な解答はSerendipさんのものだった。
+;http://www.serendip.ws/archives/1305
+;明日、これを徹底的に理解する。
 (define (check-loop lst)
   (define checked-lst nil)
   (define (check-lst lst)
     (cond
       [(memq lst checked-lst) #t]
-      [else #f]
+      [else (begin (set! checked-lst (cons lst checked-lst)) #f)]
       )
     )
   (define (sub lst)
     (cond
       [(null? lst) #f]
       [(not (pair? lst)) #f]
-      [(check-lst lst)
-       #t]
-      [else
-       (begin
-        (set! checked-lst (cons lst checked-lst))
-               (sub (cdr lst)))
+      [else (if (check-lst (car lst))
+         #t
+        (sub (cdr lst)))
        ]
       ))
   (sub lst)
   )
+
+(define (circulate? items)
+  (define walks '())
+  (define (has-circulate? x)
+    (if (memq x walks)
+        #t
+        (begin (set! walks (cons x walks)) #f)))
+  (define (circulate?-iter i)
+    (if (not (pair? i))
+        #f
+        (if (has-circulate? (car i))
+            #t
+            (circulate?-iter (cdr i)))))
+  (circulate?-iter items))
+
 
 
 (define (last-pair x)
@@ -40,17 +56,17 @@
   (set-cdr! (last-pair x) x)
   x)
 (define z (make-cycle (list 'a 'b 'c)))
-;(display (check-loop z)) ;#t
+;(display (circulate? z)) ;#t
 ;(newline)
-;(display (check-loop (list 'a 'b 'c))) ;#f
+;(display (circulate? (list 'a 'b 'c))) ;#f
 ;(newline)
-;(display (check-loop nil)) ;#f
+;(display (circulate? nil)) ;#f
 ;(newline)
-;(display (check-loop (cons z '(1 2 3)))) ;#t
+;(display (circulate? (cons z '(1 2 3)))) ;#t
 ;(newline)
-;(display (check-loop (cons '(1 2 3) z))) ;#t
+;(display (circulate? (cons '(1 2 3) z))) ;#t
 ;(newline)
-;(display (check-loop (list 'a 'a 'a))) ;#fになってるので、前より前に進んだ。
+;(display (circulate? (list 'a 'a 'a))) ;#fになってるので、前より前に進んだ。
 ;(newline)
 ;(newline)
 
