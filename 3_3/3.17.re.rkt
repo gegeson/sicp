@@ -5,6 +5,7 @@
 ;3ポモドーロ
 ;13:39->14:05
 ;+1ポモドーロ
+;+5m
 ;以下のa5で3にならず2になる理由にずっと悩んでいたが、やっと判明。
 ;最初の時点でリストに加えてしまうせいで、
 ;一番下でもう一度出てきた時にもう遭遇済みと判定している。
@@ -18,6 +19,10 @@
 ;(not (has (car x) lst))
 ;というふうにしたら行けた。よく考えたらこれと逆とは排他的でない。
 ;cdrを持つがcarも持つ、という事がありうるのだ。
+
+;最後に、線形リストだと上手くいかないことがあったが、
+;デバッグした結果、先頭だけを調べている状態になることが原因らしかったので、
+;修正。すると他のテストケースに影響なく普通に動いた。完成かな。
 
 (define (count-pairs1 x)
   (if (not (pair? x))
@@ -42,11 +47,11 @@
          [(not (has (car x) lst))
           (begin (set! lst (cons (car x) lst))
                 ;(printf "lst ~a \n " lst)
-                 (+ 1 (sub (car x))))]
+                 (+ 1 (sub (car x)) (sub (cdr x))))]
         [(not (has (cdr x) lst))
          (begin (set! lst (cons (cdr x) lst))
                 ;(printf "lst ~a \n" lst)
-                (+ 1 (sub (cdr x))))]
+                (+ 1 (sub (cdr x)) (sub (cdr x))))]
         [(eq? (car x) (cdr x))
          (begin (set! lst (cons (car x) lst))
                 (+ (sub (car x)) (sub (cdr x)) 1))
