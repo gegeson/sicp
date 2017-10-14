@@ -44,21 +44,18 @@
         [(not (pair? x)) 0]
         [(and (has (car x) lst) (has (cdr x) lst))
          0]
-         [(not (has (car x) lst))
+         [(and (not (has (car x) lst)) (not (has (car x) lst)))
           (begin (set! lst (cons (car x) lst))
-                ;(printf "lst ~a \n " lst)
                  (+ 1 (sub (car x)) (sub (cdr x))))]
-        [(not (has (cdr x) lst))
+        [(and (has (car x) lst) (not (has (cdr x) lst)))
          (begin (set! lst (cons (cdr x) lst))
-                ;(printf "lst ~a \n" lst)
-                (+ 1 (sub (cdr x)) (sub (cdr x))))]
+                (+ 1 (sub (cdr x))))]
         [(eq? (car x) (cdr x))
          (begin (set! lst (cons (car x) lst))
                 (+ (sub (car x)) (sub (cdr x)) 1))
          ]
         [else
           (begin (set! lst (cons (car x) (cons (cdr x) lst)))
-          ; (printf "lst ~a \n" lst)
            (+ (sub (car x)) (sub (cdr x)) 2))]
         ))
     (sub x)
