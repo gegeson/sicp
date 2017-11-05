@@ -4,11 +4,12 @@
 ;O(1)で扱うには、
 ;リストのそれぞれが、次の値だけでなく前の値も持つようにしなければならない
 ;双方向リストにする必要があるわけで結構巨大な変更では…？
+;結構大きい変更だったが、ちょうどいい難易度だったので一応自力でできた。
 ;22m
 ;25m
 ;22:34->22:59(25m)
 ;23:05->23:27(22m)
-;23:38->23:41
+;23:38->23:41(3m)
 (define (get-value trio)
   (car trio))
 (define (get-next trio)
@@ -153,6 +154,14 @@
 (print-deque q2)
 (newline)
 (rear-delete-deque! q2)
+(newline)
+(print-deque q2)
+(newline)
+(rear-delete-deque! q2)
+(newline)
+(print-deque q2)
+(newline)
+(front-delete-deque! q2)
 (newline)
 (print-deque q2)
 (newline)
