@@ -28,15 +28,17 @@
     ))
 (define (assoc-iter keys subtable)
   (cond
-    [(eq? #f subtable) #f]
+    [(eq? subtable #f) #f]
     [(null? keys) subtable]
     [else
      (let ((newtable (assoc (car keys) (cdr subtable))))
-       (assoc-iter (cdr keys) newtable))
+       (if newtable
+         (assoc-iter (cdr keys) newtable)
+         subtable))
      ]
     )
   )
-(trace assoc-iter)
+;(trace assoc-iter)
 
 
 (define (insert! key-1 key-2 value table)
@@ -60,3 +62,4 @@
 (insert! 'study 'math 10 x)
 (insert! 'neko 'nyaa 22 x)
 (assoc-iter '(study math) x)
+(assoc-iter '(study nyaa) x)
