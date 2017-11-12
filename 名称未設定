@@ -1,0 +1,4 @@
+#lang debug racket
+(require sicp)
+(require racket/trace)
+;5:47->5:59
