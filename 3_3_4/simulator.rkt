@@ -7,6 +7,7 @@
 ;14:11->14:12
 ;3.3.4全体に渡って主にこちらを参照している。
 ;http://uents.hatenablog.com/entry/sicp/032-ch3.3.4.md
+
 ;;;; -----------------------------------
 ;;;; 回路の実装
 ;;;; -----------------------------------
@@ -93,11 +94,11 @@
 		  (begin (set! signal-value new-value)
 				 (call-each action-procedures))
 		  'done))
-;;	(define (accept-action-procedure! proc)
-;;	  (set! action-procedures (cons proc action-procedures))
-;;	  (proc))
-	(define (accept-action-procedure! proc) ;; for ex 3.31
-	  (set! action-procedures (cons proc action-procedures)))
+	(define (accept-action-procedure! proc)
+	  (set! action-procedures (cons proc action-procedures))
+	  (proc))
+	;(define (accept-action-procedure! proc) ;; for ex 3.31
+	;  (set! action-procedures (cons proc action-procedures)))
 	(define (dispatch m)
 	  (cond ((eq? m 'get-signal) signal-value)
 			((eq? m 'set-signal!) set-my-signal!)
@@ -287,10 +288,26 @@
 (define input-2 (make-wire))
 (define sum (make-wire))
 (define carry (make-wire))
-(probe 'sum sum)
-(probe 'carry carry)
-(half-adder input-1 input-2 sum carry)
-(set-signal! input-1 1)
+;(probe 'sum sum)
+;(probe 'carry carry)
+;(half-adder input-1 input-2 sum carry)
+;(set-signal! input-1 1)
+;(propagate)
+;(set-signal! input-2 1)
+;(propagate)
+(define in-1 (make-wire))
+(define out (make-wire))
+(probe 'in-1 in-1)
+(probe 'out out)
+(inverter in-1 out)
+(set-signal! in-1 1)
 (propagate)
-(set-signal! input-2 1)
+(set-signal! in-1 0)
 (propagate)
+
+;in-1 0 New-value = 0
+;out 0 New-value = 0
+;'ok
+;out 2 New-value = 1
+;'done
+;[Finished in 0.609s]

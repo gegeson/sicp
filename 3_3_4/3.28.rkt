@@ -1,3 +1,6 @@
+;********************
+;重大なミス&勘違いがあったのでinverter.rkt読んで
+;********************
 #lang debug racket
 (require sicp)
 (require racket/trace)
