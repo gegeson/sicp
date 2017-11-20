@@ -319,3 +319,32 @@
 (propagate)
 (set-signal! b4 1)
 (propagate)
+
+;(define a (make-wire))
+;
+;(define b (make-wire))
+;
+;(define c-in (make-wire))
+;
+;(define sum (make-wire))
+;
+;(define c-out (make-wire))
+;
+;(probe 'a a)
+;
+;(probe 'b b)
+;
+;(probe 'c-in c-in)
+;
+;(probe 'sum sum)
+;
+;(probe 'c-out c-out)
+;
+;(full-adder a b c-in sum c-out)
+;
+;(set-signal! a 1)
+;(propagate)
+;(set-signal! b 1)
+;(propagate)
+;(set-signal! c-in 1)
+;(propagate)
