@@ -104,9 +104,9 @@
 		  (begin (set! signal-value new-value)
 				 (call-each action-procedures))
 		  'done))
-;;	(define (accept-action-procedure! proc)
-;;	  (set! action-procedures (cons proc action-procedures))
-;;	  (proc))
+	;(define (accept-action-procedure! proc)
+	;  (set! action-procedures (cons proc action-procedures))
+	;  (proc))
 	(define (accept-action-procedure! proc) ;; for ex 3.31
 	  (set! action-procedures (cons proc action-procedures)))
 	(define (dispatch m)
@@ -327,13 +327,19 @@
 (propagate)
 
 ;注意:コピペミスにより、この結果は期待されるものと違う。
+;3.31でこのファイルの検索をかければ見つかるが、3.31を解くために一部書き換えたものをコピペしていた。
+;しかし、3.31のつなぎになったので無駄ではない。
+;正しい結果を、一番下に載せておいた。
 
+;（この考察は初期化なしaccept-action-procedure!を使った版のものです）
 ;初期状態からどこかで出力が0になった場合、変化なし=出力なしと認識され、
-;「仕切り直し」になるため、最初の1回を通すのに実際にかかる時間は相当長くなる。
+;「仕切り直し」になるため、最初の1回を通すのに実際にかかる時間は相当長くなる。→コピペミスのバグです
 ;2+2+3+2
 ;+2+3+2 = 16
 ;そのあとはちゃんと、想定通りの7ディレイで次に行っている。
-;-結果--------------
+;-------------------------
+;ここから誤った（3.31用にaccept-action-procedure!を書き換えた版の）結果
+;-------------------------
 ;'ok
 ;in-1 0 New-value = 1
 ;'done
@@ -375,3 +381,67 @@
 ;andout 28 New-value = 0
 ;out 30 New-value = 1
 ;'done
+;-------------------------
+;ここまで誤った（3.31用にaccept-action-procedure!を書き換えた版の）結果
+;-------------------------
+;-------------------------
+;ここから正しい（accept-action-procedure!を書き換えなかった版の）結果
+;-------------------------
+;in-1 0 New-value = 0
+;in-2 0 New-value = 0
+;out 0 New-value = 0
+;a1out 0 New-value = 0
+;a2out 0 New-value = 0
+;andout 0 New-value = 0
+;'ok
+;in-1 0 New-value = 1
+;'done
+;in-2 0 New-value = 1
+;'done
+;a1out 2 New-value = 1
+;a2out 2 New-value = 1
+;out 2 New-value = 1
+;a1out 2 New-value = 0
+;a2out 2 New-value = 0
+;andout 5 New-value = 1
+;andout 5 New-value = 0
+;out 7 New-value = 0
+;out 7 New-value = 1
+;'done
+;in-1 7 New-value = 0
+;'done
+;in-2 7 New-value = 0
+;'done
+;a1out 9 New-value = 1
+;a2out 9 New-value = 1
+;andout 12 New-value = 1
+;out 14 New-value = 0
+;'done
+;in-1 14 New-value = 1
+;'done
+;in-2 14 New-value = 1
+;'done
+;a1out 16 New-value = 0
+;a2out 16 New-value = 0
+;andout 19 New-value = 0
+;out 21 New-value = 1
+;'done
+;in-1 21 New-value = 0
+;'done
+;in-2 21 New-value = 0
+;'done
+;a1out 23 New-value = 1
+;a2out 23 New-value = 1
+;andout 26 New-value = 1
+;out 28 New-value = 0
+;'done
+;in-1 28 New-value = 1
+;'done
+;in-2 28 New-value = 1
+;'done
+;a1out 30 New-value = 0
+;a2out 30 New-value = 0
+;andout 33 New-value = 0
+;out 35 New-value = 1
+;'done
+;[Finished in 1.002s]

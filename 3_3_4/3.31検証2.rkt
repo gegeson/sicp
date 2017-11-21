@@ -1,31 +1,7 @@
-;********************
-;重大なミス&勘違いがあったのでinverter.rkt読んで
-;********************
-
 #lang debug racket
 (require sicp)
 (require racket/trace)
 
-;18:56->19:06(途中)
-;9:40->9:58
-;10:2->10:11
-;10:17->10:43
-;10:52->11:17
-;11:21->11:56
-;+10m
-;一応解けたと思うが、どういうわけか正しく動かない。
-;問題の部分含め、すべてコピペしても正しく動かないので、
-;間違えてるから正しく動かないというわけではなさそう。。。
-;なにせ、全加算器だけのテストをしても動かないのだ。
-;(require sicp)で何かがおかしくなっている？
-
-;->ダメ元でもう一回検証してみよう、と思って改めて問題部分以外全部コピペ
-;なんと、どういうわけか正しく動いた。（後にわかったが、3.31を踏まえたコードをコピペしていたせいである）
-;ただ、ビットのスタート位置が右からスタートなので、参考にしてたサイトと結果が違う。
-
-;（解いた部分とテストコードは一番下）
-
-;ディレイ時間の計算は鮮やかにパス（みんな解いてないしね）
 
 ;;NB. To use half-adder, need or-gate from exercise 3.28
 (define (half-adder a b s c)
@@ -101,8 +77,7 @@
                  (call-each action-procedures))
           'done))
     (define (accept-action-procedure! proc)
-      (set! action-procedures (cons proc action-procedures))
-      (proc))
+      (set! action-procedures (cons proc action-procedures)))
     (define (dispatch m)
       (cond ((eq? m 'get-signal) signal-value)
             ((eq? m 'set-signal!) set-my-signal!)
@@ -149,27 +124,6 @@
                  (display "  New-value = ")
                  (display (get-signal wire)))))
 
-;;; Sample simulation
-
-;: (define input-1 (make-wire))
-;: (define input-2 (make-wire))
-;: (define sum (make-wire))
-;: (define carry (make-wire))
-;:
-;: (probe 'sum sum)
-;: (probe 'carry carry)
-;:
-;: (half-adder input-1 input-2 sum carry)
-;: (set-signal! input-1 1)
-;: (propagate)
-;:
-;: (set-signal! input-2 1)
-;: (propagate)
-
-
-;; EXERCISE 3.31
-;: (define (accept-action-procedure! proc)
-;:   (set! action-procedures (cons proc action-procedures)))
 
 
 ;;;Implementing agenda
@@ -289,88 +243,20 @@
 (define and-gate-delay 3)
 (define or-gate-delay 5)
 
+(define input-1 (make-wire))
+(define input-2 (make-wire))
+(define sum (make-wire))
+(define carry (make-wire))
 
-(define (ripple-carry-adder a_lst b_lst s_lst c-out)
-  (cond
-    [(null? (cdr a_lst))
-      (full-adder (car a_lst) (car b_lst) (make-wire) (car s_lst) c-out)]
-    [else
-      (let
-        ((c (make-wire)))
-        (ripple-carry-adder (cdr a_lst) (cdr b_lst) (cdr s_lst) c)
-        (full-adder (car a_lst) (car b_lst) c (car s_lst) c-out)
-        )
-     ]
-  ))
+(probe 'sum sum)
+(probe 'carry carry)
 
+(half-adder input-1 input-2 sum carry)
 
-(define a1 (make-wire))
-(define a2 (make-wire))
-(define a3 (make-wire))
-(define a4 (make-wire))
-(define b1 (make-wire))
-(define b2 (make-wire))
-(define b3 (make-wire))
-(define b4 (make-wire))
-(define s1 (make-wire))
-(define s2 (make-wire))
-(define s3 (make-wire))
-(define s4 (make-wire))
-(define a (list a1 a2 a3 a4))
-(define b (list b1 b2 b3 b4))
-(define s (list s1 s2 s3 s4))
-(define c (make-wire))
+(set-signal! input-1 1)
 
-(probe 's1 s1)
-(probe 's2 s2)
-(probe 's3 s3)
-(probe 's4 s4)
-(probe 'c c)
-
-(ripple-carry-adder a b s c)
-
-(set-signal! a4 1)
 (propagate)
 
-(set-signal! a3 1)
+(set-signal! input-2 1)
+
 (propagate)
-
-(set-signal! a2 1)
-(propagate)
-
-(set-signal! a1 1)
-(propagate)
-(set-signal! b4 1)
-(propagate)
-
-;    1111
-;  + 0001
-;=  10000
-
-;実行結果
-
-;s1 0  New-value = 0
-;s2 0  New-value = 0
-;s3 0  New-value = 0
-;s4 0  New-value = 0
-;c 0  New-value = 0'ok
-;'done
-;
-;s4 8  New-value = 1'done
-;'done
-;
-;s3 16  New-value = 1'done
-;'done
-;
-;s2 24  New-value = 1'done
-;'done
-;
-;s1 32  New-value = 1'done
-;'done
-;
-;s4 48  New-value = 0
-;s3 64  New-value = 0
-;s2 80  New-value = 0
-;c 96  New-value = 1
-;s1 96  New-value = 0'done
-;[Finished in 0.629s]

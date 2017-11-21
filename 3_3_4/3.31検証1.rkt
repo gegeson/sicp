@@ -2,7 +2,6 @@
 (require sicp)
 (require racket/trace)
 
-;3.30.rktが何故か動かないので、全文コピペでチャレンジ
 
 ;;NB. To use half-adder, need or-gate from exercise 3.28
 (define (half-adder a b s c)
@@ -126,28 +125,6 @@
                  (display "  New-value = ")
                  (display (get-signal wire)))))
 
-;;; Sample simulation
-
-;: (define input-1 (make-wire))
-;: (define input-2 (make-wire))
-;: (define sum (make-wire))
-;: (define carry (make-wire))
-;:
-;: (probe 'sum sum)
-;: (probe 'carry carry)
-;:
-;: (half-adder input-1 input-2 sum carry)
-;: (set-signal! input-1 1)
-;: (propagate)
-;:
-;: (set-signal! input-2 1)
-;: (propagate)
-
-
-;; EXERCISE 3.31
-;: (define (accept-action-procedure! proc)
-;:   (set! action-procedures (cons proc action-procedures)))
-
 
 ;;;Implementing agenda
 
@@ -261,52 +238,25 @@
 (define (print-queue q)
   ((q 'print-proc)))
 
-(define (ripple-carry-adder list-a list-b list-sum c-out)
-  (define (iter list-a list-b list-sum c-in)
-    (if (not (null? list-a))
-        (let ((c-out (make-wire)))
-             (full-adder (car list-a) (car list-b) c-in (car list-sum) c-out)
-             (iter (cdr list-a) (cdr list-b) (cdr list-sum) c-out))
-        'ok))
-  (iter list-a list-b list-sum c-out))
+(define the-agenda (make-agenda))
+(define inverter-delay 2)
+(define and-gate-delay 3)
+(define or-gate-delay 5)
 
-  (define the-agenda (make-agenda))
-  (define inverter-delay 2)
-  (define and-gate-delay 3)
-  (define or-gate-delay 5)
+(define input-1 (make-wire))
+(define input-2 (make-wire))
+(define sum (make-wire))
+(define carry (make-wire))
 
-  (define a1 (make-wire))
-  (define a2 (make-wire))
-  (define a3 (make-wire))
-  (define a4 (make-wire))
+(probe 'sum sum)
+(probe 'carry carry)
 
-  (define b1 (make-wire))
-  (define b2 (make-wire))
-  (define b3 (make-wire))
-  (define b4 (make-wire))
+(half-adder input-1 input-2 sum carry)
 
-  (define s1 (make-wire))
-  (define s2 (make-wire))
-  (define s3 (make-wire))
-  (define s4 (make-wire))
+(set-signal! input-1 1)
 
-  (define a (list a1 a2 a3 a4))
-  (define b (list b1 b2 b3 b4))
-  (define s (list s1 s2 s3 s4))
-  (define c (make-wire))
+(propagate)
 
-  (probe 's1 s1)
-  (probe 's2 s2)
-  (probe 's3 s3)
-  (probe 's4 s4)
-  (probe 'c c)
+(set-signal! input-2 1)
 
-  (ripple-carry-adder a b s c)
-  (set-signal! a1 1)
-  (propagate)
-
-  (set-signal! b1 1)
-  (propagate)
-
-  (set-signal! a2 1)
-  (propagate)
+(propagate)
