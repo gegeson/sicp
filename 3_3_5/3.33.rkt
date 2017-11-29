@@ -2,34 +2,7 @@
 (require sicp)
 (require racket/trace)
 
-;14:10->14:52
-;+10m+5m
-;21:20->22:04
-;+15m
-
-;制約ネットワークは、
-;コネクタのユーザーがいるかどうかでコネクタが値をもっているかどうかを判定する
-;（ユーザーがいるなら値を持っている、ユーザーがいないなら値を持っていない、とみなす）
-;
-;値をセットする時
-;コネクタはuserユーザーから値を受け取り
-;それを元に制約ネットワークにつながっている相手にinform-about-valueを投げて、
-;制約システムがそれを元に値を計算し、「値が未定」（ユーザーが不在）のコネクタに値を渡す
-;（定数は値が既にあるので渡らない）
-;ついでに新しく値が決まったコネクタが、またinform-about-valueを投げる
-;これを行き止まりまで続ける
-;制約システムによってセットされたコネクタのユーザーはセットした制約システムである
-;値を忘れる時は、値をセットしたユーザーと同一ユーザーが、ユーザー名の削除を命じることで値を忘れる
-;これも値を渡したときと同様の伝搬がある。
-;定数値は、自分自身がユーザーなので、自らforgetを呼び出さない限り値を忘れることがない。
-;また、最初からユーザーを持ち続けているので値が変化することもない。
-
-
-;;;SECTION 3.3.5
-
-;: (define C (make-connector))
-;: (define F (make-connector))
-;: (celsius-fahrenheit-converter C F)
+;20:06->20:19
 
 (define (celsius-fahrenheit-converter c f)
   (let ((u (make-connector))
@@ -50,13 +23,6 @@
     (constant 32 y)
     'ok))
 
-;: (probe "Celsius temp" C)
-;: (probe "Fahrenheit temp" F)
-;: (set-value! C 25 'user)
-;: (set-value! F 212 'user)
-;: (forget-value! C 'user)
-;: (set-value! F 212 'user)
-
 
 (define (adder a1 a2 sum)
   (define (process-new-value)
@@ -75,8 +41,8 @@
   (define (process-forget-value)
     (forget-value! sum me)
     (forget-value! a1 me)
-    (forget-value! a2 me)
-    (process-new-value))
+    (forget-value! a2 me))
+    ;(process-new-value))
   (define (me request)
     (cond ((eq? request 'I-have-a-value)
            (process-new-value))
@@ -217,11 +183,50 @@
 (define (connect connector new-constraint)
   ((connector 'connect) new-constraint))
 
-(define C (make-connector))
-(define F (make-connector))
-(celsius-fahrenheit-converter C F)
-(probe "Celsius temp" C)
-(probe "Fahrenheit temp" F)
-(set-value! C 25 'user)
-(forget-value! C 'user)
+;(define C (make-connector))
+;(define F (make-connector))
+;(celsius-fahrenheit-converter C F)
+;(probe "Celsius temp" C)
+;(probe "Fahrenheit temp" F)
+;(set-value! C 25 'user)
+;(forget-value! C 'user)
 ;(set-value! F 212 'user)
+
+
+
+(define (average a b c)
+  (let ((denom (make-connector))
+        (u (make-connector)))
+    (adder a b u)
+    (multiplier denom c u)
+    (constant 2 denom)
+    'ok))
+
+(define A (make-connector))
+(define B (make-connector))
+(define C (make-connector))
+(average A B C)
+(probe "A" A)
+(probe "B" B)
+(probe "C" C)
+;(set-value! A 3 'user)
+;(set-value! B 5 'user)
+;(forget-value! A 'user)
+;(set-value! A 10 'user)
+;(forget-value! B 'user)
+;(set-value! C 7 'user)
+
+(set-value! A 3 'user)
+(set-value! C 10 'user)
+(forget-value! A 'user)
+
+;出来ている。
+;これテストして気づいた。
+;値を忘れる時、なんでセットしたユーザーと同じユーザーじゃなきゃ駄目なんだ？
+;と思ってた疑問解消。
+;A, BをセットすることでCが決まる、という時、
+;AとBをセット→Cが決まる
+;→Aだけリセット
+;とした時に、Bはそのままにしたいのだ。
+;これは値のリセットをした時に「定数だけ無視」とするとうまくいかない。
+;よく出来たプログラムだなあ。

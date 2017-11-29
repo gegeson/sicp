@@ -2,61 +2,18 @@
 (require sicp)
 (require racket/trace)
 
-;14:10->14:52
-;+10m+5m
-;21:20->22:04
-;+15m
-
-;制約ネットワークは、
-;コネクタのユーザーがいるかどうかでコネクタが値をもっているかどうかを判定する
-;（ユーザーがいるなら値を持っている、ユーザーがいないなら値を持っていない、とみなす）
-;
-;値をセットする時
-;コネクタはuserユーザーから値を受け取り
-;それを元に制約ネットワークにつながっている相手にinform-about-valueを投げて、
-;制約システムがそれを元に値を計算し、「値が未定」（ユーザーが不在）のコネクタに値を渡す
-;（定数は値が既にあるので渡らない）
-;ついでに新しく値が決まったコネクタが、またinform-about-valueを投げる
-;これを行き止まりまで続ける
-;制約システムによってセットされたコネクタのユーザーはセットした制約システムである
-;値を忘れる時は、値をセットしたユーザーと同一ユーザーが、ユーザー名の削除を命じることで値を忘れる
-;これも値を渡したときと同様の伝搬がある。
-;定数値は、自分自身がユーザーなので、自らforgetを呼び出さない限り値を忘れることがない。
-;また、最初からユーザーを持ち続けているので値が変化することもない。
-
-
-;;;SECTION 3.3.5
-
-;: (define C (make-connector))
-;: (define F (make-connector))
-;: (celsius-fahrenheit-converter C F)
-
-(define (celsius-fahrenheit-converter c f)
-  (let ((u (make-connector))
-        (v (make-connector))
-        (w (make-connector))
-        (x (make-connector))
-        (y (make-connector)))
-    (probe "u" u)
-    (probe "v" v)
-    (probe "w" w)
-    (probe "x" x)
-    (probe "y" y)
-    (multiplier c w u)
-    (multiplier v x u)
-    (adder v y f)
-    (constant 9 w)
-    (constant 5 x)
-    (constant 32 y)
-    'ok))
-
-;: (probe "Celsius temp" C)
-;: (probe "Fahrenheit temp" F)
-;: (set-value! C 25 'user)
-;: (set-value! F 212 'user)
-;: (forget-value! C 'user)
-;: (set-value! F 212 'user)
-
+;20:56->21:49
+;制約システム内の
+;(process-forget-value)における、
+;最後の行の
+;(process-new-value)
+;これがなぜ必要なのか、すごく悩んだけどよくわからなかった。
+;多分だけど、リセットしたはいいが値を計算可能である、という時、
+;リセットを取り消してもう一度値を計算して送る、
+;という処理をやってるのだろうけど、
+;それが必要な場面というのがありえるのか、わからない。
+;実験してみた感じ、なさそう。
+;問題にほぼ関係ないし、むずいので打ち切り。
 
 (define (adder a1 a2 sum)
   (define (process-new-value)
@@ -170,7 +127,7 @@
              (error "Contradiction" (list value newval)))
             (else 'ignored)))
     (define (forget-my-value retractor)
-      (if (eq? retractor informant)
+      (if (eq? #RRretractor #RRinformant)
           (begin (set! informant false)
                  (for-each-except retractor
                                   inform-about-no-value
@@ -217,11 +174,54 @@
 (define (connect connector new-constraint)
   ((connector 'connect) new-constraint))
 
+;--------------------------------
+(define (squarer a b)
+  (define (process-new-value)
+    (if (has-value? b)
+      (if (< (get-value b) 0)
+        (error "square less than 0: SQUARER" (get-value b))
+        (set-value! a (sqrt (get-value b)) me))
+      (if (has-value? a);この条件を忘れてた。初めてデバッガのステップ実行が役立った
+        (set-value! b (* (get-value a) (get-value a)) me))))
+  (define (process-forget-value)
+    (forget-value! a me)
+    (forget-value! b me)
+    (process-new-value))
+  (define (me request)
+    (cond ((eq? request 'I-have-a-value)
+         (process-new-value))
+        ((eq? request 'I-lost-my-value)
+         (process-forget-value))
+        (else
+         (error "Unknown request -- SQUARER" request))))
+  (connect a me)
+  (connect b me)
+  me)
+
+(define A (make-connector))
+(define B (make-connector))
 (define C (make-connector))
+(define D (make-connector))
+(define E (make-connector))
 (define F (make-connector))
-(celsius-fahrenheit-converter C F)
-(probe "Celsius temp" C)
-(probe "Fahrenheit temp" F)
-(set-value! C 25 'user)
-(forget-value! C 'user)
-;(set-value! F 212 'user)
+(probe "A" A)
+(probe "B" B)
+(probe "C" C)
+(probe "D" D)
+(probe "E" E)
+(probe "F" F)
+
+(define x (make-connector))
+(define y (make-connector))
+
+(adder A B x)
+(adder C D x)
+(adder C D y)
+(adder E F y)
+(constant 2 B)
+(constant 2 D)
+(set-value! A 3 'user)
+
+(set-value! E 1 'user)
+
+(forget-value! E 'user)

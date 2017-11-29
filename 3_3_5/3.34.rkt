@@ -2,61 +2,7 @@
 (require sicp)
 (require racket/trace)
 
-;14:10->14:52
-;+10m+5m
-;21:20->22:04
-;+15m
-
-;制約ネットワークは、
-;コネクタのユーザーがいるかどうかでコネクタが値をもっているかどうかを判定する
-;（ユーザーがいるなら値を持っている、ユーザーがいないなら値を持っていない、とみなす）
-;
-;値をセットする時
-;コネクタはuserユーザーから値を受け取り
-;それを元に制約ネットワークにつながっている相手にinform-about-valueを投げて、
-;制約システムがそれを元に値を計算し、「値が未定」（ユーザーが不在）のコネクタに値を渡す
-;（定数は値が既にあるので渡らない）
-;ついでに新しく値が決まったコネクタが、またinform-about-valueを投げる
-;これを行き止まりまで続ける
-;制約システムによってセットされたコネクタのユーザーはセットした制約システムである
-;値を忘れる時は、値をセットしたユーザーと同一ユーザーが、ユーザー名の削除を命じることで値を忘れる
-;これも値を渡したときと同様の伝搬がある。
-;定数値は、自分自身がユーザーなので、自らforgetを呼び出さない限り値を忘れることがない。
-;また、最初からユーザーを持ち続けているので値が変化することもない。
-
-
-;;;SECTION 3.3.5
-
-;: (define C (make-connector))
-;: (define F (make-connector))
-;: (celsius-fahrenheit-converter C F)
-
-(define (celsius-fahrenheit-converter c f)
-  (let ((u (make-connector))
-        (v (make-connector))
-        (w (make-connector))
-        (x (make-connector))
-        (y (make-connector)))
-    (probe "u" u)
-    (probe "v" v)
-    (probe "w" w)
-    (probe "x" x)
-    (probe "y" y)
-    (multiplier c w u)
-    (multiplier v x u)
-    (adder v y f)
-    (constant 9 w)
-    (constant 5 x)
-    (constant 32 y)
-    'ok))
-
-;: (probe "Celsius temp" C)
-;: (probe "Fahrenheit temp" F)
-;: (set-value! C 25 'user)
-;: (set-value! F 212 'user)
-;: (forget-value! C 'user)
-;: (set-value! F 212 'user)
-
+;20:21->20:25
 
 (define (adder a1 a2 sum)
   (define (process-new-value)
@@ -217,11 +163,27 @@
 (define (connect connector new-constraint)
   ((connector 'connect) new-constraint))
 
-(define C (make-connector))
-(define F (make-connector))
-(celsius-fahrenheit-converter C F)
-(probe "Celsius temp" C)
-(probe "Fahrenheit temp" F)
-(set-value! C 25 'user)
-(forget-value! C 'user)
-;(set-value! F 212 'user)
+;--------------------------------
+;パッと見で予想ついたが、一応実験。
+(define (squarer a b) (multiplier a a b))
+
+(define A (make-connector))
+(define B (make-connector))
+(probe "A" A)
+(probe "B" B)
+(squarer A B)
+
+(set-value! A 3 'user)
+;Probe: B = 9
+;Probe: A = 3'done
+
+(forget-value! A 'user)
+;Probe: B = ?
+;Probe: A = ?'done
+
+(set-value! B 9 'user)
+;Probe: B = 9'done
+
+;だよねえ。
+;つまり、bからaを計算する時、aが二つとも不定値だから計算のしようがない。
+;これを改善するには、multiplierに頼らず、sqrt使ってちゃんとしたのを書く必要があると思う。
