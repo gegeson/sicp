@@ -54,4 +54,20 @@
       (cons-stream (car sequence)
                    (list->stream (cdr sequence)))))
 
+(define (stream-ref s n)
+ (if (= n 0)
+     (stream-car s)
+     (stream-ref (stream-cdr s) (- n 1))))
+
+(define (display-s s from to)
+    (map (lambda (i) (display (stream-ref s i)) (newline))
+                     (enumerate-interval from to)))
+
+(define (enumerate-interval low high)
+ (if (> low high)
+     nil
+     (cons low (enumerate-interval (+ low 1) high))))
+     
+(define (add-streams s1 s2) (stream-map + s1 s2))
+
 (provide (all-defined-out))
