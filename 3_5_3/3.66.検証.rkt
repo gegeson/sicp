@@ -28,6 +28,7 @@
  (iter s n 1))
 
 (stream-head (pairs integers integers) 767)
+
 ; {7 7}, count = 127
 ; {7 8}, count = 191
 ; {8 8}, count = 255
