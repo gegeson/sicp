@@ -15,6 +15,7 @@
 ;   (cons-stream 1 (add-streams (stream-cdr s) (partial-sums s)))
 ;   )
 ; 間違えてた。ここ1じゃなくて(stream-car s)だよ。
+
 (define (partial-sums s)
   (cons-stream (stream-car s) (add-streams (stream-cdr s) (partial-sums s)))
   )
@@ -23,3 +24,14 @@
 ; parital-sums         1 3  6  10  14
 ; parital-sums       1 3 6 10  15
 (display-s (partial-sums integers) 0 5)
+
+; 後日思いついた別解。汚いがこういうのもあり
+; sの先端を結果のcdr以降にすべて足し、cdrにそれを再帰的に適用する、という考え方
+(define (add-stream stream factor)
+  (stream-map (lambda (x) (+ x factor)) stream))
+
+(define (partial-sums2 s)
+  (cons-stream (stream-car s)
+    (add-stream (partial-sums2 (stream-cdr s)) (stream-car s))))
+
+(display-s (partial-sums2 integers) 0 5)
