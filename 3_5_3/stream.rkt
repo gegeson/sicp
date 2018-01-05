@@ -73,4 +73,9 @@
 (define (scale-stream stream factor)
   (stream-map (lambda (x) (* x factor)) stream))
 
+(define ones (cons-stream 1 ones))
+
+(define integers
+  (cons-stream 1 (add-streams ones integers)))
+
 (provide (all-defined-out))
