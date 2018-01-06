@@ -5,7 +5,12 @@
 ; 7:45->8:16
 ; 8:27->9:07
 ; 9:18->9:36
-; 9:45->
+; 9:45->10:11
+; 10:15->10:44
+
+; 失敗作たちは3.69.failed.rktに置いた
+; 他の人の解答と考察は3.69.考察.rktに置いた
+
 ; 方針1
 ; pairsでペア作った後に、
 ; ペアと数値のストリーム受け取ってトリプルを返す関数に渡せばよいのでは。
@@ -24,6 +29,7 @@
 ; がうまくいく場合、(a, b)は(b, c)より必ず番号が若い。
 ; つまり、自分より年上とだけマッチするようにすればいいっぽいな。
 ; このことがわかってもまだ難しい気がするが…
+
 ; 重複の排除がムズい……
 ; 方針2の再帰において
 ; p1, p2の次への進み方
@@ -36,7 +42,9 @@
 ; を作る
 ; p1は止めてp2だけ進むやつは、
 ; 常にp2だけ進める
-; を、光明見えたかも
+; というふうにすると重複が排除できるかも。
+; お、光明見えたかも
+; →成功〜（多分）
 
 (define (interleave s1 s2)
   (if (stream-null? s1)
@@ -52,37 +60,9 @@
                (stream-cdr t))
    (pairs (stream-cdr s) (stream-cdr t)))))
 
-(define (<= a b)
-  (or (< a b) (= a b)))
 
-; 失敗作1
-(define (triples-failed s t u)
-  (let ((p (pairs t u)))
-    (define (iter s p)
-     (cons-stream
-      (cons (stream-car s) (stream-car p))
-      (interleave
-       (stream-map (lambda (x) (if (<= (stream-car s) (car x))
-                                 (cons (stream-car s) x)
-                                 nil)) (stream-cdr p))
-       (iter (stream-cdr s) (stream-cdr p)))))
-    (iter s p)))
-; 失敗作2
-(define (triples-failed2 s t u)
-  (let ((p1 (pairs s t))
-        (p2 (pairs t u)))
-    (define (iter p1 p2)
-      (if (= (cadr (stream-car p1)) (car (stream-car p2)))
-        (begin (printf "~a ~a \n"  (stream-car p1)  (stream-car p2))
-        (cons-stream (cons (car (stream-car p1)) (stream-car p2))
-                     (iter (stream-cdr p2) p1)
-                     ))
-        (iter (stream-cdr p2) p1)
-        )
-      )
-    (iter p1 p2))
-  )
 ; すっげえ煩雑だけど多分うまくいったやつ
+; ネットにもっといい解答があったので3.69.考察.rktで考察を書いた
 (define (triples s t u)
   (let ((p1 (pairs s t))
         (p2 (pairs t u)))
@@ -111,4 +91,19 @@
        (iter (stream-cdr s) (- n 1)))))
  (iter s n))
 
-(stream-head (triples integers integers integers) 10)
+; (stream-head (triples integers integers integers) 25)
+
+(define (pythagoras i j k)
+  (= (+ (* i i) (* j j)) (* k k)))
+
+(define pythagoras-stream
+  (stream-filter
+   (lambda (x)
+           (pythagoras (car x) (cadr x) (caddr x))
+           )
+   (triples integers integers integers)
+   )
+  )
+
+; 2以上でさえめっちゃ重いが、一応機能してるっぽい
+(stream-head pythagoras-stream 1)
