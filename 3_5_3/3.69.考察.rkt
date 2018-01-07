@@ -25,6 +25,33 @@
 ; ってやってるから(1, 1, 2)にたどり着くことはない。
 ; 公式解答を見てみたら、やはり少し違った。下に解説を書いた。
 
+(define (interleave s1 s2)
+  (if (stream-null? s1)
+    s2
+    (cons-stream (stream-car s1)
+                 (interleave s2 (stream-cdr s1)))))
+
+(define (pairs s t)
+ (cons-stream
+  (list (stream-car s) (stream-car t))
+  (interleave
+   (stream-map (lambda (x) (list (stream-car s) x))
+               (stream-cdr t))
+   (pairs (stream-cdr s) (stream-cdr t)))))
+
+(define (pythagoras i j k)
+  (= (+ (* i i) (* j j)) (* k k)))
+
+  (define (stream-head s n)
+  (define (iter s n)
+    (if (<= n 0)
+      'done
+      (begin
+        (display (stream-car s))
+        (newline)
+        (iter (stream-cdr s) (- n 1)))))
+  (iter s n))
+
 (define (triples2 s t u)
   (cons-stream
    (list (stream-car s) (stream-car t) (stream-car u))
