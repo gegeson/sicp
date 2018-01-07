@@ -3,7 +3,6 @@
 (require (prefix-in strm: racket/stream))
 (require "3_5_3/stream.rkt")
 ; 10:50->11:26
-; 13:45->13:55
 (define (average x y) (/ (+ x y) 2))
 
 (define (square x) (* x x))
