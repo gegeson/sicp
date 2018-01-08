@@ -4,6 +4,7 @@
 (require (prefix-in strm: racket/stream))
 (require "3_5_4/stream.rkt")
 ; 11:12->11:33
+; 15:34->15:39
 ; +5m
 ;
 ; dy = f(y)dt … 1.
@@ -35,3 +36,8 @@
   y)
 
 (display (stream-ref (solve (lambda (x) x) 1 0.001) 1000))
+
+; 後半の話。
+; 全部 delay forceをデフォルトにするのが得策、
+; インタプリタレベルでそうするとよい。4章で実際にやる。
+; しかし破壊的代入が絡むと3.51, 3.52のような混乱が生じる。

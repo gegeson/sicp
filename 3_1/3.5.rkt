@@ -38,7 +38,7 @@
 )
 
 ;解答を参考に
-;こちらは範囲内の実数が表示される。制度がいいに決まってる
+;こちらは範囲内の実数が表示される。精度がいいに決まってる
 (define (random-in-range low high)
   (let ((range (- high low)))
     (+ low (* (random) range))))
