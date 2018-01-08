@@ -70,4 +70,22 @@
 
 (define (add-streams s1 s2) (stream-map + s1 s2))
 
+(define (scale-stream stream factor)
+  (stream-map (lambda (x) (* x factor)) stream))
+
+(define ones (cons-stream 1 ones))
+
+(define integers
+  (cons-stream 1 (add-streams ones integers)))
+
+  (define (stream-head s n)
+    (define (iter s n)
+      (if (<= n 0)
+        'done
+        (begin
+          (display (stream-car s))
+          (newline)
+          (iter (stream-cdr s) (- n 1)))))
+    (iter s n))
+
 (provide (all-defined-out))
