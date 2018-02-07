@@ -1,0 +1,30 @@
+mceval.rkt
+が4.1のメタ循環評価器。
+
+こちらをベースに、applyの定義差し替えを取り除いた形になっている。（Racketでは不要だったので。）
+http://www.serendip.ws/archives/1817
+
+一番上の二行
+#lang r5rs
+(#%require (only scheme/base error))
+これもないと動かなかった。
+これはこちら参照。
+https://stackoverflow.com/questions/19675250/metacircular-evaluator-of-scheme-in-dr-racket
+
+使い方は、コンソールで
+
+$ racket
+
+> ,enter "mceval.rkt"
+
+"mceval.rkt"> (driver-loop)
+
+と入力。すると
+
+;;; M-Eval input:
+
+この表示に変わる。
+この状態でインタプリタのREPLが使えるようになる。
+
+ここにたどり着くまで結構時間かかってしまった。
+先人たちに感謝を。
