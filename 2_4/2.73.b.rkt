@@ -63,7 +63,6 @@
               (deriv (augend exp) var))
     )
   (define (deriv-product exp var)
-
     (make-sum
      (make-product (multiplier exp)
                    (deriv (multiplicand exp) var))

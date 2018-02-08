@@ -26,5 +26,10 @@ $ racket
 この表示に変わる。
 この状態でインタプリタのREPLが使えるようになる。
 
+,enter （ファイル名）
+でそのファイルに移る方法は
+こちらを参照した。
+https://github.com/uents/sicp/tree/master/ch4.1-scheme-evaluator
+
 ここにたどり着くまで結構時間かかってしまった。
 先人たちに感謝を。
