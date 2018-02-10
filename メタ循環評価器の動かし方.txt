@@ -1,15 +1,29 @@
+21:14->22:36
+22:42->22:54
+
 mceval.rkt
 が4.1のメタ循環評価器。
 
-こちらをベースに、applyの定義差し替えを取り除いた形になっている。（Racketでは不要だったので。）
+こちらをベースに、applyの定義差し替えを取り除いた形になっている。
 http://www.serendip.ws/archives/1817
 
-一番上の二行
-#lang r5rs
-(#%require (only scheme/base error))
-これもないと動かなかった。
-これはこちら参照。
-https://stackoverflow.com/questions/19675250/metacircular-evaluator-of-scheme-in-dr-racket
+---この段落に関しては、気付いたのは4.5.rktからである---
+r5rsでは処理系デフォルトのapplyが存在しないために、
+carとかconsとか使おうとしても使えない。
+そのため
+#lang racket
+が必要。
+あとset-car!を読み込むために
+(require sicp)
+も要る。
+
+そしてこれでもevalが処理系デフォルトのものと衝突するので、
+自分で定義する方の eval を _eval
+自分で定義する方の apply を _apply
+とした。
+applyに関しても、名前を変えておく事で処理系デフォルトのapplyを呼び出したい時を区別出来るようになる。
+----------------------
+
 
 使い方は、コンソールで
 
@@ -31,5 +45,5 @@ $ racket
 こちらを参照した。
 https://github.com/uents/sicp/tree/master/ch4.1-scheme-evaluator
 
-ここにたどり着くまで結構時間かかってしまった。
+ここにたどり着くまでものすごく時間がかかってしまった。
 先人たちに感謝を。
