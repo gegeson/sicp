@@ -23,6 +23,10 @@ carとかconsとか使おうとしても使えない。
 とした。
 applyに関しても、名前を変えておく事で処理系デフォルトのapplyを呼び出したい時を区別出来るようになる。
 ----------------------
+ついでに、
+#lang debug racket
+とすると、#RRによるデバッグが使えるようになる！
+---------------------
 
 
 使い方は、コンソールで
@@ -47,3 +51,19 @@ https://github.com/uents/sicp/tree/master/ch4.1-scheme-evaluator
 
 ここにたどり着くまでものすごく時間がかかってしまった。
 先人たちに感謝を。
+-----
+ちゃんとこんなのが動く
+
+;;; M-_eval input:
+(define (length l)
+  (cond ((null? l) 0)
+    (else (+ 1 (length (cdr l))))))
+
+;;; M-_eval value:
+ok
+
+;;; M-_eval input:
+(length '(1 2 3))
+
+;;; M-_eval value:
+3

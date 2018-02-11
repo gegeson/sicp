@@ -1,6 +1,10 @@
 #lang debug racket
 (require sicp)
 
+; こちらをベースに、applyの定義差し替えを取り除いた形になっている。
+; http://www.serendip.ws/archives/1817
+; 詳しくは"メタ循環評価器の動かし方.txt"
+
 ; 使い方は、コンソールで
 ; racket
 ; ,enter "mceval.rkt"
@@ -35,11 +39,12 @@
          (make-procedure (lambda-parameters exp)
                          (lambda-body exp)
                          env))
+        ((let? exp) (_eval (let->combination exp) env))
         ((begin? exp)
          (eval-sequence (begin-actions exp) env))
         ((cond? exp) (_eval (cond->if exp) env))
         ((application? exp)
-         (_apply (_eval #RR(operator exp) env)
+         (_apply (_eval (operator exp) env)
                 (list-of-values (operands exp) env)))
         (else
           (error "Unknown expression type -- EVAL" exp))))
@@ -193,33 +198,43 @@
 (define (cond->if exp)
   (expand-clauses (cond-clauses exp)))
 
-(define (cond-=>-clause? clause)
-  (eq? (cadr clause) '=>))
-
-(define (cond-recipient clause)
-  (caddr clause))
-
-(define (cond-test clause)
-  (car clause))
-
 (define (expand-clauses clauses)
   (if (null? clauses)
       #f
       (let ((first (car clauses))
             (rest (cdr clauses)))
-           (cond
-              ((cond-else-clause? first)
+           (if (cond-else-clause? first)
                (if (null? rest)
                    (sequence->exp (cond-actions first))
                    (error "ELSE clause isn't last -- COND->IF"
-                          clauses)))
-              ((cond-=>-clause? first)
-                (make-if (cond-test first)
-                  (list (cond-recipient first) (cond-test first))
-                  (expand-clauses rest)))
-               (else (make-if (cond-predicate first)
+                          clauses))
+               (make-if (cond-predicate first)
                         (sequence->exp (cond-actions first))
-                        (expand-clauses rest)))))))
+                        (expand-clauses rest))))))
+
+; 4.6 let
+(define (let? exp) (tagged-list? exp 'let))
+
+(define (let-var-exp-pairs exp)
+  (cadr exp)
+  )
+
+(define (let-vars exp)
+  (map car (let-var-exp-pairs exp)))
+
+(define (let-exps exp)
+  (map cadr (let-var-exp-pairs exp)))
+
+(define (let-body exp)
+  (cddr exp))
+
+(define (let->combination exp)
+  (let ((_lambda (make-lambda #RR(let-vars exp) #RR(let-body exp))))
+    (cons _lambda (let-exps exp))
+    )
+  )
+
+
 
 ;;;; 4.1.3 評価器のデータ構造
 
@@ -315,8 +330,7 @@
         (list 'cdr cdr)
         (list 'cons cons)
         (list 'null? null?)
-        (list 'assoc assoc)
-        (list 'cadr cadr)
+        (list '+ +)
         ;; 基本手続きが続く
         ))
 
@@ -351,8 +365,8 @@
 
 
 ;;;; 基盤の Lisp システムの"読み込み-評価-印字"ループをモデル化する"駆動ループ(driver loop)"を用意する。
-(define input-prompt ";;; M-Eval input:")
-(define output-prompt ";;; M-Eval value:")
+(define input-prompt ";;; M-_eval input:")
+(define output-prompt ";;; M-_eval value:")
 
 (define (driver-loop)
   (prompt-for-input input-prompt)

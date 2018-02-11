@@ -1,4 +1,4 @@
-#lang racket
+#lang debug racket
 (require sicp)
 
 ; こちらをベースに、applyの定義差し替えを取り除いた形になっている。
@@ -305,6 +305,7 @@
         (list 'cdr cdr)
         (list 'cons cons)
         (list 'null? null?)
+        (list '+ +)
         ;; 基本手続きが続く
         ))
 
@@ -339,8 +340,8 @@
 
 
 ;;;; 基盤の Lisp システムの"読み込み-評価-印字"ループをモデル化する"駆動ループ(driver loop)"を用意する。
-(define input-prompt ";;; M-_eval input:")
-(define output-prompt ";;; M-_eval value:")
+(define input-prompt ";;; M-Eval input:")
+(define output-prompt ";;; M-Eval value:")
 
 (define (driver-loop)
   (prompt-for-input input-prompt)
