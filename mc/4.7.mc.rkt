@@ -1,5 +1,6 @@
 #lang debug racket
 (require sicp)
+(require racket/trace)
 
 ; こちらをベースに、applyの定義差し替えを取り除いた形になっている。
 ; http://www.serendip.ws/archives/1817
@@ -40,11 +41,12 @@
                          (lambda-body exp)
                          env))
         ((let? exp) (_eval (let->combination exp) env))
+        ((let*? exp) (_eval (let*->nested-lets exp) env))
         ((begin? exp)
          (eval-sequence (begin-actions exp) env))
         ((cond? exp) (_eval (cond->if exp) env))
         ((application? exp)
-         (_apply (_eval #RR(operator exp) env)
+         (_apply (_eval (operator exp) env)
                 (list-of-values (operands exp) env)))
         (else
           (error "Unknown expression type -- EVAL" exp))))
@@ -229,11 +231,38 @@
   (cddr exp))
 
 (define (let->combination exp)
-  (let ((_lambda (make-lambda #RR(let-vars exp) #RR(let-body exp))))
+  (let ((_lambda (make-lambda (let-vars exp) (let-body exp))))
     (cons _lambda (let-exps exp))
     )
   )
 
+; 4.7 let*
+(define (let*? exp) (tagged-list? exp 'let*))
+
+(define (let*-var-exp-pairs exp)
+  (cadr exp)
+  )
+
+(define (let*-body exp)
+  (caddr exp)
+  )
+
+(define (make-let pairs body)
+    (list 'let (list pairs) body)
+    )
+
+(define (let*->nested-lets exp)
+  (define (iter pairs body)
+    (if (null? (cdr pairs))
+      (make-let (car pairs) body)
+      (make-let (car pairs) (iter (cdr pairs) body)))
+    )
+  (let ((pairs (let*-var-exp-pairs exp))
+        (body (let*-body exp)))
+    (trace iter)
+    (iter pairs body)
+    )
+  )
 
 
 ;;;; 4.1.3 評価器のデータ構造
@@ -331,6 +360,7 @@
         (list 'cons cons)
         (list 'null? null?)
         (list '+ +)
+        (list '* *)
         ;; 基本手続きが続く
         ))
 
@@ -365,8 +395,8 @@
 
 
 ;;;; 基盤の Lisp システムの"読み込み-評価-印字"ループをモデル化する"駆動ループ(driver loop)"を用意する。
-(define input-prompt ";;; M-_eval input:")
-(define output-prompt ";;; M-_eval value:")
+(define input-prompt ";;; M-Eval input:")
+(define output-prompt ";;; M-Eval value:")
 
 (define (driver-loop)
   (prompt-for-input input-prompt)
