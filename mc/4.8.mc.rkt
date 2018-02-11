@@ -44,7 +44,7 @@
          (eval-sequence (begin-actions exp) env))
         ((cond? exp) (_eval (cond->if exp) env))
         ((application? exp)
-         (_apply (_eval #RR(operator exp) env)
+         (_apply (_eval (operator exp) env)
                 (list-of-values (operands exp) env)))
         (else
           (error "Unknown expression type -- EVAL" exp))))
@@ -228,13 +228,44 @@
 (define (let-body exp)
   (cddr exp))
 
+
 (define (let->combination exp)
-  (let ((_lambda (make-lambda #RR(let-vars exp) #RR(let-body exp))))
-    (cons _lambda (let-exps exp))
-    )
+  (cond
+    ((= (length exp) 3)
+         (let ((_lambda (make-lambda (let-vars exp) (let-body exp))))
+           (cons _lambda (let-exps exp))
+           ))
+    ((= (length exp) 4) (let->define_and_apply exp))
+    (else
+      (error "letの構文がおかしいです" exp)
+      ))
   )
 
+(define (let2-var exp)
+  (cadr exp))
 
+(define (let2-params exp)
+  (map car (let2-bindings exp))
+  )
+
+(define (let2-args exp)
+  (map cadr (let2-bindings exp))
+  )
+
+(define (let2-bindings exp)
+  (caddr exp))
+
+(define (let2-body exp)
+  (cadddr exp))
+
+(define (make-define name params body)
+  (list 'define (cons name params) body))
+
+(define (let->define_and_apply exp)
+  (make-begin
+   (list (make-define (let2-var exp) (let2-params exp) (let2-body exp))
+         (cons (let2-var exp) (let2-args exp))))
+  )
 
 ;;;; 4.1.3 評価器のデータ構造
 
@@ -331,6 +362,8 @@
         (list 'cons cons)
         (list 'null? null?)
         (list '+ +)
+        (list '- -)
+        (list '= =)
         ;; 基本手続きが続く
         ))
 
