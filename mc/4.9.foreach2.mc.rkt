@@ -42,6 +42,7 @@
         ((begin? exp)
          (eval-sequence (begin-actions exp) env))
         ((cond? exp) (_eval (cond->if exp) env))
+        ((for? exp) (_eval (for->apply_lambda exp) env))
         ((application? exp)
          (_apply (_eval (operator exp) env)
                 (list-of-values (operands exp) env)))
@@ -211,6 +212,32 @@
                         (sequence->exp (cond-actions first))
                         (expand-clauses rest))))))
 
+; 4.9 foreach
+
+(define (for? exp)
+    (tagged-list? exp 'for))
+
+(define (for-i-list exp) (cadr exp))
+
+(define (for-vars exp) (map car (for-i-list exp)))
+
+(define (for-lists exp) (map cadr (for-i-list exp)))
+
+(define (for-body exp) (caddr exp))
+
+(define (for->apply_lambda exp)
+  (let* ((vars (for-vars exp))
+         (lsts (for-lists exp))
+         (body (for-body exp)))
+    (define (iter lsts)
+      (if (null? (car lsts))
+        nil
+        (cons
+         (cons (make-lambda vars (list body)) (map car lsts))
+         (iter (map cdr lsts)))))
+    (make-begin (iter lsts)))
+  )
+
 ;;;; 4.1.3 評価器のデータ構造
 
 ;;;; 述語のテスト
@@ -305,12 +332,10 @@
         (list 'cdr cdr)
         (list 'cons cons)
         (list 'null? null?)
-        (list 'display display)
         (list '+ +)
         (list '- -)
-        (list '* *)
-        (list '/ /)
         (list '= =)
+        (list 'display display)
         ;; 基本手続きが続く
         ))
 

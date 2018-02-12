@@ -1,10 +1,18 @@
 10:58->11:27
 考察・方針については"./4.9.for.考察.rkt"を参照。
-実験室は"mc/4.9.for.mc.rkt"
+実験室は"mc/4.9.foreach.mc.rkt"
 出来たー。
 
 forって名前だけど実質foreach。
-せっかくなので普通のforも作ろうかな、ということで"./4.9.for.rkt"で挑戦。
+せっかくなので普通のforも作ろうかな、ということで"./4.9.for.rkt"で挑戦
+→失敗。おぞましいので削除。whileも試したけどこれも失敗。
+代わりに変数が複数あってもOKなバージョンの"./4.9.foreach2.rkt"をトライ。
+→こっちは成功。
+
+これを動かすことが目標。
+(for (i (1 2 3))
+  (display i)
+  )
 
 (define (for? exp)
     (tagged-list? exp 'for))
@@ -39,9 +47,9 @@ forって名前だけど実質foreach。
 #<void>
 
 ;;; M-Eval input:
-  (for (k (1 2 3))
-    (display k)
-    )
+(for (k (1 2 3))
+  (display k)
+  )
 123
 ;;; M-Eval value:
 #<void>

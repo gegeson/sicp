@@ -212,7 +212,7 @@
                         (sequence->exp (cond-actions first))
                         (expand-clauses rest))))))
 
-; 4.9 for
+; 4.9 foreach
 
 (define (for? exp)
     (tagged-list? exp 'for))
