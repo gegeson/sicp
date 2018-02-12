@@ -54,16 +54,16 @@ https://github.com/uents/sicp/tree/master/ch4.1-scheme-evaluator
 -----
 ちゃんとこんなのが動く
 
-;;; M-_eval input:
+;;; M-Eval input:
 (define (length l)
   (cond ((null? l) 0)
     (else (+ 1 (length (cdr l))))))
 
-;;; M-_eval value:
+;;; M-Eval value:
 ok
 
-;;; M-_eval input:
+;;; M-Eval input:
 (length '(1 2 3))
 
-;;; M-_eval value:
+;;; M-Eval value:
 3

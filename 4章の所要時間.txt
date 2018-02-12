@@ -13,3 +13,5 @@ mceval        94m       2/10  car, cdr, consなどが動くようになった。
 4.7           13m       2/11  考察
 4.7           22m       2/11  実装
 4.8           35m       2/11
+4.9.for       30m       2/12  for考察
+4.9.foreach   29m       2/12  foreach実装

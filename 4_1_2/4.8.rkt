@@ -38,7 +38,7 @@
   )
 
 (define (let2-args exp)
-  (map caadr (let2-bindings exp))
+  (map cadr (let2-bindings exp))
   )
 
 (define (let2-bindings exp)
