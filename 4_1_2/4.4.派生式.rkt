@@ -7,8 +7,14 @@
 実験室は "mc/4.4.2.mc.rkt" にて。
 
 17:05->17:12
+
+17:40->17:42
 順序について
 eval-ifを書き換える必要がありそうだけどだるいのでパス
+→いや…そんな必要はないぞ。
+そもそも順序が問題に生るのは、関数の引数を評価する順番が実装言語依存だからなんだった。
+つまり、この場合だとmake-ifに渡すものをletで作っておけば問題ない。
+それだけ修正しておこう。実験はせず。
 
 ---
 (and a b)
@@ -39,9 +45,10 @@ eval-ifを書き換える必要がありそうだけどだるいのでパス
   (define (and->if-sub operands)
     (if (null? operands)
       'true
-      (make-if (car operands)
-               (and->if-sub (cdr operands))
-               'false)
+      (let ((first (car operands)))
+        (make-if first
+                 (and->if-sub (cdr operands))
+                 'false))
       )
   )
 (and->if-sub (and-operands exp))
@@ -81,9 +88,10 @@ make-ifに#t/#fを渡してしまうと、インタプリタ側は#t/#fではな
   (define (or->if-sub operands)
     (if (null? operands)
       'false
-        (make-if (car operands)
-          (car operands)
-         (or->if-sub (cdr operands)))
+      (let ((first (car operands)))
+        (make-if first
+                 first
+                 (or->if-sub (cdr operands))))
       )
     )
   (or->if-sub (or-operands exp))
