@@ -1,3 +1,5 @@
+実験室はいつもどおり"mc/4.11.mc.rkt"
+
 11:27->12:14
 12:15->12:38
 12:44->12:58
@@ -25,7 +27,7 @@
 まったく動かない。defineは出来てるはずなのに、lookupで見に行く時になると消えている。
 多分set!じゃなくてset-car!、set-cdr!じゃなきゃ変更がスコープ抜けることで帳消しになるんだと思う。
 埒が明かなさ過ぎる。答えみるぞ。
-
+-------
 参考
 http://www.serendip.ws/archives/1875
 add-binding-to-frame! がこれになった途端、defineが上手く動いた。
@@ -34,7 +36,7 @@ add-binding-to-frame! がこれになった途端、defineが上手く動いた�
   (set-cdr! frame (cons (cons var val) (cdr frame))))
 
 しかし再定義・代入がダメ。ここは原因がわかる。自力でやってみよう。
-
+----
 代入がダメなのは、scanで受け取る引数をmapで生成した上で書き換えてるからだと思う。
 別なリストを作って別なリストを代入してるので、元のが書き換わらない。
 scanを書き換えればOK。
@@ -54,7 +56,9 @@ scanを書き換えればOK。
 scanを以下のように変更する事で上手く行った。
 （三つとも似たような変更になっている）
 scanの引数をfにしているのは、
-frameにするとdefine-variable!に渡すフレームが環境の末端になってしまい上手く行かないから。
+frameにすると
+define-variable!の中でadd-binding-to-frame!に渡すフレームが、
+環境の末端になってしまい上手く行かないから。
 
 (define (lookup-variable-value var env)
   (define (env-loop env)
