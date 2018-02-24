@@ -17,5 +17,8 @@ def count_time(filename):
     for i in result_lst:
         sum += i
     return sum
-
+print(count_time('所要時間/1章1周目の所要時間.txt')/60.)
+print(count_time('所要時間/1章2周目の所要時間.txt')/60.)
+print(count_time('所要時間/2章の所要時間.txt')/60.)
+print(count_time('所要時間/3章の所要時間.txt')/60.)
 print(count_time('所要時間/4章の所要時間.txt')/60.)
