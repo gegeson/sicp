@@ -7,6 +7,7 @@
     (define a 5)
     (+ a b))
   (f 10))
+
 Racketくんは
 >a: undefined;
 を返すそうです。
