@@ -28,25 +28,7 @@
 
 
 ;;;; _eval の定義
-(define (_eval exp env)
-  (cond ((self-evaluating? exp) exp)
-        ((variable? exp) (lookup-variable-value exp env))
-        ((quoted? exp) (text-of-quotation exp))
-        ((assignment? exp) (eval-assignment exp env))
-        ((definition? exp) (eval-definition exp env))
-        ((if? exp) (eval-if exp env))
-        ((lambda? exp)
-         (make-procedure (lambda-parameters exp)
-                         (lambda-body exp)
-                         env))
-        ((begin? exp)
-         (eval-sequence (begin-actions exp) env))
-        ((cond? exp) (_eval (cond->if exp) env))
-        ((application? exp)
-         (_apply (_eval (operator exp) env)
-                (list-of-values (operands exp) env)))
-        (else
-          (error "Unknown expression type -- EVAL" exp))))
+
 
 
 ;;;; 手続きの引数
@@ -373,7 +355,7 @@
 
 ;;;SECTION 4.1.7
 
-(define (eval exp env)
+(define (_eval exp env)
   ((analyze exp) env))
 
 (define (analyze exp)
@@ -446,7 +428,7 @@
   (let ((fproc (analyze (operator exp)))
         (aprocs (map analyze (operands exp))))
     (lambda (env)
-      (execute-application (fproc env)
+      (execute-application (fproc #RRenv)
                            (map (lambda (aproc) (aproc env))
                                 aprocs)))))
 
