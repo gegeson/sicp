@@ -17,8 +17,14 @@ def count_time(filename):
     for i in result_lst:
         sum += i
     return sum
-print(count_time('所要時間/1章1周目の所要時間.txt')/60.)
-print(count_time('所要時間/1章2周目の所要時間.txt')/60.)
-print(count_time('所要時間/2章の所要時間.txt')/60.)
-print(count_time('所要時間/3章の所要時間.txt')/60.)
-print(count_time('所要時間/4章の所要時間.txt')/60.)
+t1 = count_time('所要時間/1.txt')/60.
+t2 = count_time('所要時間/1.2.txt')/60.
+t3 = count_time('所要時間/2.txt')/60.
+t4 = count_time('所要時間/3.txt')/60.
+t5 = count_time('所要時間/4章の所要時間.txt')/60.
+print(t1)
+print(t2)
+print(t3)
+print(t4)
+print(t5)
+print(t1 + t2 + t3 + t4 + t5)

@@ -1,46 +1,101 @@
 #lang debug racket
 (require sicp)
 
-; こちらをベースに、applyの定義差し替えを取り除いた形になっている。
-; http://www.serendip.ws/archives/1817
-; 詳しくは"メタ循環評価器の動かし方.txt"
-
-; 使い方は、コンソールで
-; racket
-; ,enter "mceval.rkt"
-; "mceval.rkt">(driver-loop)
-;
+; こちらを参照した。eval, applyにアンダーバーつけて退避（4.1と同様）
+; http://www.serendip.ws/archives/2171
+;; 基盤の _apply への参照を _apply-in-underlying-scheme へ退避させる（こうすることで、基盤の _apply に _apply-in-underlying-scheme という名前でアクセスできる）。
 
 ;;;; _apply の定義
-(define (_apply procedure arguments)
+(define (_apply procedure arguments env)
   (cond ((primitive-procedure? procedure)
-         (apply-primitive-procedure procedure arguments))
+         (apply-primitive-procedure
+           procedure
+           (list-of-arg-values arguments env))) ; 変更した
         ((compound-procedure? procedure)
          (eval-sequence
            (procedure-body procedure)
            (extend-environment
              (procedure-parameters procedure)
-             arguments
+             (list-of-delayed-args arguments env) ; 変更した
              (procedure-environment procedure))))
         (else
           (error
-            "Unknown procedure type -- APPLY" procedure))))
-
+            "Unknown procedure type -- apply" procedure))))
 
 ;;;; _eval の定義
+(define (_eval exp env)
+  (cond ((self-evaluating? exp) exp)
+        ((variable? exp) (lookup-variable-value exp env))
+        ((quoted? exp) (text-of-quotation exp))
+        ((assignment? exp) (eval-assignment exp env))
+        ((definition? exp) (eval-definition exp env))
+        ((if? exp) (eval-if exp env))
+        ((lambda? exp)
+         (make-procedure (lambda-parameters exp)
+                         (lambda-body exp)
+                         env))
+        ((begin? exp)
+         (eval-sequence (begin-actions exp) env))
+        ((cond? exp) (_eval (cond->if exp) env))
+        ((application? exp)
+         (_apply (actual-value (operator exp) env)
+                (operands exp)
+                env))
+        (else
+          (error "Unknown expression type -- EVAL" exp))))
 
+(define (actual-value exp env)
+  (force-it (_eval exp env)))
 
-
-;;;; 手続きの引数
-(define (list-of-values exps env)
+;;;; 引数を処理する手続き
+(define (list-of-arg-values exps env)
   (if (no-operands? exps)
       '()
-      (cons (_eval (first-operand exps) env)
-            (list-of-values (rest-operands exps) env))))
+      (cons (actual-value (first-operand exps) env)
+            (list-of-arg-values (rest-operands exps)
+                                env))))
+
+(define (list-of-delayed-args exps env)
+  (if (no-operands? exps)
+      '()
+      (cons (delay-it (first-operand exps) env)
+            (list-of-delayed-args (rest-operands exps)
+                                  env))))
+
+;;;; サンクの表現
+(define (delay-it exp env)
+  (list 'thunk exp env))
+
+(define (thunk? obj)
+  (tagged-list? obj 'thunk))
+
+(define (thunk-exp thunk) (cadr thunk))
+
+(define (thunk-env thunk) (caddr thunk))
+
+(define (evaluated-thunk? obj)
+  (tagged-list? obj 'evaluated-thunk))
+
+(define (thunk-value evaluated-thunk) (cadr evaluated-thunk))
+
+;; メモ化した force-it
+(define (force-it obj)
+  (cond ((thunk? obj)
+         (let ((result (actual-value
+                         (thunk-exp obj)
+                         (thunk-env obj))))
+              (set-car! obj 'evaluated-thunk)
+              (set-car! (cdr obj) result) ; exp をその値で置き換える
+              (set-cdr! (cdr obj) '()) ; 不要な env を忘れる
+              result))
+        ((evaluated-thunk? obj)
+         (thunk-value obj))
+        (else obj)))
+
 
 ;;;; 条件式
 (define (eval-if exp env)
-  (if (true? (_eval (if-predicate exp) env))
+  (if (true? (actual-value (if-predicate exp) env))
       (_eval (if-consequent exp) env)
       (_eval (if-alternative exp) env)))
 
@@ -287,12 +342,16 @@
         (list 'cdr cdr)
         (list 'cons cons)
         (list 'null? null?)
-        (list 'display display)
+        (list 'assoc assoc)
         (list '+ +)
         (list '- -)
         (list '* *)
         (list '/ /)
         (list '= =)
+        (list '< <)
+        (list '> >)
+        (list 'printf printf)
+        (list 'display display)
         ;; 基本手続きが続く
         ))
 
@@ -321,19 +380,18 @@
 (define (primitive-implementation proc) (cadr proc))
 
 (define (apply-primitive-procedure proc args)
-; これは実装言語側のapply
   (apply
     (primitive-implementation proc) args))
 
-
 ;;;; 基盤の Lisp システムの"読み込み-評価-印字"ループをモデル化する"駆動ループ(driver loop)"を用意する。
-(define input-prompt ";;; M-Eval input:")
-(define output-prompt ";;; M-Eval value:")
+(define input-prompt ";;; L-Eval input:")
+(define output-prompt ";;; L-Eval value:")
 
 (define (driver-loop)
   (prompt-for-input input-prompt)
   (let ((input (read)))
-       (let ((output (_eval input the-global-environment)))
+       (let ((output
+               (actual-value input the-global-environment)))
             (announce-output output-prompt)
             (user-print output)))
   (driver-loop))
@@ -352,97 +410,4 @@
                      '<procedure-env>))
       (display object)))
 
-
-;;;SECTION 4.1.7
-
-(define (_eval exp env)
-  ((analyze exp) env))
-
-(define (analyze exp)
-  (cond ((self-evaluating? exp)
-         (analyze-self-evaluating exp))
-        ((quoted? exp) (analyze-quoted exp))
-        ((variable? exp) (analyze-variable exp))
-        ((assignment? exp) (analyze-assignment exp))
-        ((definition? exp) (analyze-definition exp))
-        ((if? exp) (analyze-if exp))
-        ((lambda? exp) (analyze-lambda exp))
-        ((begin? exp) (analyze-sequence (begin-actions exp)))
-        ((cond? exp) (analyze (cond->if exp)))
-        ((application? exp) (analyze-application exp))
-        (else
-         (error "Unknown expression type -- ANALYZE" exp))))
-
-(define (analyze-self-evaluating exp)
-  (lambda (env) exp))
-
-(define (analyze-quoted exp)
-  (let ((qval (text-of-quotation exp)))
-    (lambda (env) qval)))
-
-(define (analyze-variable exp)
-  (lambda (env) (lookup-variable-value exp env)))
-
-(define (analyze-assignment exp)
-  (let ((var (assignment-variable exp))
-        (vproc (analyze (assignment-value exp))))
-    (lambda (env)
-      (set-variable-value! var (vproc env) env)
-      'ok)))
-
-(define (analyze-definition exp)
-  (let ((var (definition-variable exp))
-        (vproc (analyze (definition-value exp))))
-    (lambda (env)
-      (define-variable! var (vproc env) env)
-      'ok)))
-
-(define (analyze-if exp)
-  (let ((pproc (analyze (if-predicate exp)))
-        (cproc (analyze (if-consequent exp)))
-        (aproc (analyze (if-alternative exp))))
-    (lambda (env)
-      (if (true? (pproc env))
-          (cproc env)
-          (aproc env)))))
-
-(define (analyze-lambda exp)
-  (let ((vars (lambda-parameters exp))
-        (bproc (analyze-sequence (lambda-body exp))))
-    (lambda (env) (make-procedure vars bproc env))))
-
-(define (analyze-sequence exps)
-  (define (sequentially proc1 proc2)
-    (lambda (env) (proc1 env) (proc2 env)))
-  (define (loop first-proc rest-procs)
-    (if (null? rest-procs)
-        first-proc
-        (loop (sequentially first-proc (car rest-procs))
-              (cdr rest-procs))))
-  (let ((procs (map analyze exps)))
-    (if (null? procs)
-        (error "Empty sequence -- ANALYZE"))
-    (loop (car procs) (cdr procs))))
-
-(define (analyze-application exp)
-  (let ((fproc (analyze (operator exp)))
-        (aprocs (map analyze (operands exp))))
-    (lambda (env)
-      (execute-application (fproc #RRenv)
-                           (map (lambda (aproc) (aproc env))
-                                aprocs)))))
-
-(define (execute-application proc args)
-  (cond ((primitive-procedure? proc)
-         (apply proc args))
-        ((compound-procedure? proc)
-         ((procedure-body proc)
-          (extend-environment (procedure-parameters proc)
-                              args
-                              (procedure-environment proc))))
-        (else
-         (error
-          "Unknown procedure type -- EXECUTE-APPLICATION"
-          proc))))
-
-'ANALYZING-METACIRCULAR-EVALUATOR-LOADED
+(driver-loop)
