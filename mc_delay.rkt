@@ -92,7 +92,6 @@
          (thunk-value obj))
         (else obj)))
 
-
 ;;;; 条件式
 (define (eval-if exp env)
   (if (true? (actual-value (if-predicate exp) env))
@@ -352,6 +351,9 @@
         (list '> >)
         (list 'printf printf)
         (list 'display display)
+        (list 'even? even?)
+        (list 'remainder remainder)
+        (list 'exp exp)
         ;; 基本手続きが続く
         ))
 
