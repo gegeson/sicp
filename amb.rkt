@@ -504,6 +504,8 @@
 ;;;; 4.1.4 評価器をプログラムとして走らせる
 (define primitive-procedures
   (list (list 'car car)
+        (list 'cadr cadr)
+        (list 'caddr caddr)
         (list 'cdr cdr)
         (list 'cons cons)
         (list 'null? null?)
@@ -512,6 +514,8 @@
         (list 'member member)
         (list 'assoc assoc)
         (list 'not not)
+        (list 'even? even?)
+        (list 'odd? odd?)
         (list '+ +)
         (list '- -)
         (list '* *)
@@ -521,7 +525,9 @@
         (list '> >)
         (list 'abs abs)
         (list 'remainder remainder)
-        (list 'print print)
+        (list 'printf printf)
+        (list 'display display)
+        (list 'newline newline)
         ;; 基本手続きが続く
         ))
 
