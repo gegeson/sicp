@@ -58,7 +58,8 @@ http://www.serendip.ws/archives/2339
 (define (test2 a b)
   (let ((i (an-integer-starting-from a)))
     (let ((j (an-integer-starting-from b)))
-        (list i j))))
+        (amb (list i j) (list (+ i 1) j) (list i (+ j 1))
+             (test2 (+ i 1) (+ j 1))))))
 
 なかなか解けないが、色々試行錯誤してわかったこと。
 (amb 初期値 再帰)
