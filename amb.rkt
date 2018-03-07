@@ -33,6 +33,7 @@
         ((assignment? exp) (analyze-assignment exp))
         ((definition? exp) (analyze-definition exp))
         ((if? exp) (analyze-if exp))
+        ((and? exp) (analyze (and->if exp)))
         ((lambda? exp) (analyze-lambda exp))
         ((begin? exp) (analyze-sequence (begin-actions exp)))
         ((cond? exp) (analyze (cond->if exp)))
@@ -206,6 +207,26 @@
                                   (aproc env succeed fail2)))
                       ;; 述語の評価の失敗継続
                       fail))))
+
+; and
+(define (and? exp)
+  (tagged-list? exp 'and))
+
+(define (and-operands exp)
+  (cdr exp))
+
+(define (and->if exp)
+  (define (and->if-sub operands)
+    (if (null? operands)
+      'true
+      (let ((first (car operands)))
+        (make-if first
+                 (and->if-sub (cdr operands))
+                 'false))
+      )
+  )
+(and->if-sub (and-operands exp))
+)
 
 ;;;; begin
 (define (begin? exp) (tagged-list? exp 'begin))
