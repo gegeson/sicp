@@ -34,6 +34,7 @@
         ((definition? exp) (analyze-definition exp))
         ((if? exp) (analyze-if exp))
         ((and? exp) (analyze (and->if exp)))
+        ((or? exp) (analyze (or->if exp)))
         ((lambda? exp) (analyze-lambda exp))
         ((begin? exp) (analyze-sequence (begin-actions exp)))
         ((cond? exp) (analyze (cond->if exp)))
@@ -227,6 +228,27 @@
   )
 (and->if-sub (and-operands exp))
 )
+
+; or
+(define (or? exp)
+  (tagged-list? exp 'or))
+
+(define (or-operands exp)
+  (cdr exp))
+
+(define (or->if exp)
+  (define (or->if-sub operands)
+    (if (null? operands)
+      'false
+      (let ((first (car operands)))
+        (make-if first
+                 first
+                 (or->if-sub (cdr operands))))
+      )
+    )
+  (or->if-sub (or-operands exp))
+  )
+
 
 ;;;; begin
 (define (begin? exp) (tagged-list? exp 'begin))
@@ -530,6 +552,8 @@
         (list 'cdr cdr)
         (list 'cons cons)
         (list 'null? null?)
+        (list 'null? null?)
+        (list 'equal? equal?)
         (list 'list list)
         (list 'memq memq)
         (list 'member member)
