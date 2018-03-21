@@ -8,8 +8,9 @@
 という方針にした
 なんとなくこの方面の力を鍛えたいならSQLやるほうがいい気がする
 
-13:11->
-
 (rule (append-to-form () ?y ?y))
 (rule (append-to-form (?u . ?v) ?y (?u . ?z))
 (append-to-form ?v ?y ?z))
+
+http://sioramen.sub.jp/blog/2009/12/sicp-441-p269-appendtoform.html
+ここがわかりやすい

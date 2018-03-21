@@ -28,3 +28,5 @@ print(t3)
 print(t4)
 print(t5)
 print(t1 + t2 + t3 + t4 + t5)
+t6 = count_time('所要時間/4.4.txt')/60.
+print(t6)
