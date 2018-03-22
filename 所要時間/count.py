@@ -22,11 +22,13 @@ t2 = count_time('所要時間/1.2.txt')/60.
 t3 = count_time('所要時間/2.txt')/60.
 t4 = count_time('所要時間/3.txt')/60.
 t5 = count_time('所要時間/4章の所要時間.txt')/60.
+t6 = count_time('所要時間/解き直し.txt')/60.
 print(t1)
 print(t2)
 print(t3)
 print(t4)
 print(t5)
-print(t1 + t2 + t3 + t4 + t5)
-t6 = count_time('所要時間/4.4.txt')/60.
 print(t6)
+print(t1 + t2 + t3 + t4 + t5 + t6)
+t7 = count_time('所要時間/4.4.txt')/60.
+print(t7)
