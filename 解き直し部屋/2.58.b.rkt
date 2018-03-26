@@ -133,3 +133,6 @@
 (deriv '(x + 3 * x + x + x * y) 'x)
 (deriv '(x * 3 * x * x + x * y * y + y * x) 'x)
 (deriv '(x + x + x * x * 3 * y * 5 + x * x) 'x)
+(deriv '(x + 3 * x * x + x * (y + 2)) 'x)
+(deriv '(x + 3 * x * x + (x + (x * x + x))) 'x)
+(deriv '(x + 3 * x * x + (x + (x * (x + x) * y * x))) 'x)
