@@ -18,15 +18,17 @@ def count_time(filename):
         sum += i
     return sum
 t1 = count_time('所要時間/1.txt')/60.
-t2 = count_time('所要時間/1.2.txt')/60.
-t3 = count_time('所要時間/2.txt')/60.
-t4 = count_time('所要時間/3.txt')/60.
-t5 = count_time('所要時間/4章の所要時間.txt')/60.
+t12 = count_time('所要時間/1.2.txt')/60.
+t2 = count_time('所要時間/2.txt')/60.
+t3 = count_time('所要時間/3.txt')/60.
+t4 = count_time('所要時間/4章の所要時間.txt')/60.
+t5 = count_time('所要時間/5章の所要時間.txt')/60.
 t6 = count_time('所要時間/解き直し.txt')/60.
 print(t1)
+print(t12)
 print(t2)
 print(t3)
 print(t4)
 print(t5)
 print(t6)
-print(t1 + t2 + t3 + t4 + t5 + t6)
+print(t1 + t12 + t2 + t3 + t4 + t5 + t6)
