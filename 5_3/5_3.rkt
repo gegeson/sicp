@@ -1,12 +1,14 @@
 15:54->16:23
+16:34->17:32
++3m
+17:45->18:12
+18:27->19:16
+
 今回もまた一週間ぶり
 ガベージコレクションの話。今回も読むだけにする。
 
-16:34->17:32
 ストップアンドコピーアルゴリズムがぜんぜんわからん
-+3m
-17:45->18:12
-
+_
 ここの解説で少し氷解
 
 "Implementation of a stop-and-copy garbage collector
@@ -42,8 +44,8 @@ free: 1
 scan: 1
 
 添字:  0  1  2  3  4  5  6  7
-cars  p5' /
-cdrs  p2' /
+cars  p5 /
+cdrs  p2 /
 ---
 次に、p5とp2でコピー元を参照し、それもコピーしつつ、
 コピーできたらp5, p2をコピーした先に更新する、という風にやっていく
@@ -98,3 +100,76 @@ cars  p1' n1
 cdrs  p1' p3
 
 後は同じなので略。
+---
+疑似アセンブラコードによる解説。
+解説文が邪魔でしか無かった。
+アルゴリズムが頭に入ってる状態だと、
+いちいち途中で日本語解説されるより、
+遥かにコードだけ読んだほうがわかりやすい。
+とりあえず上の例について脳内トレースした。読めてると思う。
+
+begin-garbage-collection
+  (assign free (const 0))
+  (assign scan (const 0))
+  (assign old (reg root))
+  (assign relocate-continue (label reassign-root))
+  (goto (label relocate-old-result-in-new))
+reassign-root
+  (assign root (reg new))
+  (goto (label gc-loop))
+
+gc-loop
+  (test (op =) (reg scan) (reg free))
+  (branch (label gc-flip))
+  (assign old (op vector-ref) (reg new-cars) (reg scan))
+  (assign relocate-continue (label update-car))
+  (goto (label relocate-old-result-in-new))
+
+update-car
+  (perform
+   (op vector-set!) (reg new-cars) (reg scan) (reg new))
+  (assign old (op vector-ref) (reg new-cdrs) (reg scan))
+  (assign relocate-continue (label update-cdr))
+  (goto (label relocate-old-result-in-new))
+
+update-cdr
+  (perform
+   (op vector-set!) (reg new-cdrs) (reg scan) (reg new))
+  (assign scan (op +) (reg scan) (const 1))
+  (goto (label gc-loop))
+
+relocate-old-result-in-new
+  (test (op pointer-to-pair?) (reg old))
+  (branch (label pair))
+  (assign new (reg old))
+  (goto (reg relocate-continue))
+pair
+  (assign oldcr (op vector-ref) (reg the-cars) (reg old))
+  (test (op broken-heart?) (reg oldcr))
+  (branch (label already-moved))
+  (assign new (reg free)) ;new location for pair
+  ;; update free pointer
+  (assign free (op +) (reg free) (const 1))
+  ;; Copy the car and cdr to new memory.
+  (perform (op vector-set!)
+           (reg new-cars) (reg new) (reg oldcr))
+  (assign oldcr (op vector-ref) (reg the-cdrs) (reg old))
+  (perform (op vector-set!)
+           (reg new-cdrs) (reg new) (reg oldcr))
+  ;; Construct the broken heart.
+  (perform (op vector-set!)
+           (reg the-cars) (reg old) (const broken-heart))
+  (perform
+   (op vector-set!) (reg the-cdrs) (reg old) (reg new))
+  (goto (reg relocate-continue))
+already-moved
+  (assign new (op vector-ref) (reg the-cdrs) (reg old))
+  (goto (reg relocate-continue))
+
+gc-flip
+  (assign temp (reg the-cdrs))
+  (assign the-cdrs (reg new-cdrs))
+  (assign new-cdrs (reg temp))
+  (assign temp (reg the-cars))
+  (assign the-cars (reg new-cars))
+  (assign new-cars (reg temp))
