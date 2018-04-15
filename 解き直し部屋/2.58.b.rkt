@@ -54,7 +54,7 @@
   (cond ((number? exp) 0)
         ((variable? exp)
          (if (same-variable? exp var) 1 0))
-         ((one? exp) (deriv (car exp) 'x))
+         ((one? exp) (deriv (car exp) var))
         ((simple-sum? exp)
           (make-sum (deriv (addend exp) var)
                     (deriv (augend exp) var)))
@@ -136,3 +136,4 @@
 (deriv '(x + 3 * x * x + x * (y + 2)) 'x)
 (deriv '(x + 3 * x * x + (x + (x * x + x))) 'x)
 (deriv '(x + 3 * x * x + (x + (x * (x + x) * y * x))) 'x)
+(deriv '(x + 3 * x * x + (x + (x * (x + x) * y * x))) 'y)
