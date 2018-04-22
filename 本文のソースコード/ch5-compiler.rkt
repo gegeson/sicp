@@ -133,7 +133,7 @@
 
 (define (compile-if exp target linkage)
   (let ((t-branch (make-label 'true-branch))
-        (f-branch (make-label 'false-branch))                    
+        (f-branch (make-label 'false-branch))
         (after-if (make-label 'after-if)))
     (let ((consequent-linkage
            (if (eq? linkage 'next) after-if linkage)))
