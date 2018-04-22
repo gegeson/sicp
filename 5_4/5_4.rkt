@@ -4,6 +4,9 @@
 14:25->14:28
 14:35->14:47
 14:47->15:02
+
+10:13->10:26
+
 また一週間ぶり。
 今回も読むだけ。
 ---
@@ -141,3 +144,35 @@ if, set! defineに関しては、ほぼ完全にメタ循環評価器と同じ�
 5.4.4
 ---
 特記事項なし。
+---
+---
+---
+末尾再帰じゃない、こういう再帰で何がどうなってるのかが唐突に気になった
+---
+(+ 1 (length (cdr l)))
+---
+unevに(1 (length (cdr l)))が保存され、
+expに+が保存されて
+eval-dispatchへGo
++がprimitiveであることが判明し、
+ev-appl-did-operatorへGo
+1をexpに保存し、eval-dispatchへGo
+1はそれ自身が値なので、
+すぐにev-appl-accumulate-argへGo
+arglが(1)になり、
+unevに(length (cdr l))が保存されて、
+ev-appl-operand-loopへGo
+argl=(1)がスタックに積まれ（ココ重要）
+expに(length (cdr l))が保存されて、
+最後のオペランドなので、
+ev-appl-last-argへGo
+continueにev-appl-accum-last-argが代入されて、
+eval-dispatchへGo。
+これが l が nil になるまで続き、
+再帰の度にarglがスタックに積まれ続けるので、
+線形に空間計算量が増えていく、という寸法。
+最後に
+continueにev-appl-accum-last-argが代入されているので、
+再帰部分の計算が終わったらここに帰ってきて、
+arglを(1 ((cdr l)の長さ)として和を計算をして再帰から戻る、
+という形だと思う。
