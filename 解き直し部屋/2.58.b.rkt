@@ -5,7 +5,6 @@
 
 ; 方針（思い出しながら）
 ; (x + 3 * (x + y + 2))
-; (3 * (x + y + 2) + x)
 ; を
 ; (x + (3 * (x + y + 2)))
 ; の形に変化させればOK
@@ -31,6 +30,7 @@
 ; やり方汚いけど出来た
 ; 昔のを眺めると更に汚いな
 
+;;; 最後に足す
 (define (add-last x lst)
   (if (null? lst)
       (list x)
@@ -39,6 +39,7 @@
   )
 
 (define (addend-and-augend exp)
+;;; addendがacm
   (define (iter addend exp)
   (cond
     ((null? exp) #f)

@@ -45,6 +45,9 @@
 ;各ループでは先頭だけを調べ、
 ;かつ、必ず次のループで一つ以上集合が小さくなるので、
 ;オーダーはO(n)
+;;; 「もう一方の集合に存在しないこと」が重要で、
+;;; これまでそれを保証するためにelement-of-set?を回していたが、
+;;; 順序を上手く使うことで、その要素がもう一方の集合には存在しないことを保証できる
 (define (union-set set1 set2)
     (cond
         ((or (null? set1) (null? set2)) (append set1 set2))
@@ -64,3 +67,7 @@
 (display (union-set '(1 3 5 7) '(2 4 5 6 8)))
 (newline)
 (display (union-set '(0 1 9 10) '(2 5 6 7 9)))
+(newline)
+(display (union-set '(0 1 9 10) '()))
+(newline)
+(display (union-set '() '(0 1 9 10)))
